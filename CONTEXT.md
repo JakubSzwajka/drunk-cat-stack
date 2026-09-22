@@ -1,0 +1,7 @@
+# Context
+
+This repository is a copyable configuration example. It is not a package, checker, or source of product code.
+
+A **module** is a capability with one **interface** and a private **implementation**. The interface is the small set of imports callers need. The implementation stays behind it. A **seam** is the location of that interface. **Depth** is the useful behavior a caller gets for the amount of interface it must learn.
+
+The checked example places the bookings seam at `modules/bookings/index.ts`. Delivery and use-cases may import that entry. They may not import the implementation under `internal/`.
