@@ -1,6 +1,8 @@
-import { type Booking, getBooking } from "@hosti/bookings";
+import { Bookings } from "@hosti/bookings";
+import { Effect } from "effect";
 
-export function showBooking(bookings: readonly Booking[], id: string): string {
-  const booking = getBooking(bookings, id);
-  return booking ? `${booking.guestName} (${booking.id})` : "Booking was not found.";
-}
+export const showBooking = Effect.fn("showBooking")(function* showBooking(id: string) {
+  const bookings = yield* Bookings;
+  const booking = yield* bookings.get(id);
+  return `${booking.guestName} (${booking.id})`;
+});

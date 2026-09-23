@@ -11,6 +11,15 @@ The hook-bypass fence is adapted from rat-stack
 - scripts/acceptance-cold-clone.sh
 - lefthook.yml
 
+The Effect setup is adapted from the same rat-stack commit:
+
+- tsconfig.base.json (compiler flags and Effect diagnostic list, from tsconfig.base.json)
+- package.json `prepare` script (from package.json)
+- vitest.config.ts (from packages/core/vitest.config.ts)
+- scripts/vendor-agent-sources.sh (from scripts/vendor-agent-sources.sh)
+- skills/add-an-effect-module/SKILL.md (from skills/add-a-capability/SKILL.md)
+- examples/hosti-after/src (service and test shape from packages/core/src and packages/core/test)
+
 rat-stack is distributed under the following license:
 
 MIT License

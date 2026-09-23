@@ -6,5 +6,9 @@
       "@hosti/bookings": ["./examples/hosti-after/src/modules/bookings/index.ts"]
     }
   },
-  "include": ["examples/hosti-after/src/**/*.ts", "examples/hosti-after/src/**/*.tsx"]
+  "include": [
+    "examples/hosti-after/src/**/*.ts",
+    "examples/hosti-after/src/**/*.tsx",
+    "vitest.config.ts"
+  ]
 }

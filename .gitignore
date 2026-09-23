@@ -2,6 +2,7 @@
 /dist/
 /coverage/
 /generated/
+/.agent_sources/
 # varlock: .env.schema is checked in; local values are not.
 .env
 .env.local

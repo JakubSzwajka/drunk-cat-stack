@@ -8,7 +8,7 @@ const TEST_PATH = "(?:^|/)(?:tests|__tests__)(?:/|$)|[.](?:test|spec)[.][^/]+$";
 const PACKAGE_NAMESPACE = "^@hosti/";
 const TSCONFIG = "tsconfig.json";
 
-const EXCLUDED_PATH = "(?:^|/)(?:node_modules|dist|coverage|generated)(?:/|$)";
+const EXCLUDED_PATH = "(?:^|/)(?:node_modules|dist|coverage|generated|[.]agent_sources)(?:/|$)";
 
 module.exports = {
   forbidden: [
@@ -73,6 +73,7 @@ module.exports = {
     },
   ],
   options: {
+    parser: "swc",
     exclude: {
       path: EXCLUDED_PATH,
     },
