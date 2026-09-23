@@ -14,11 +14,12 @@
     "format": "biome format --write .",
     "fix": "biome check --write .",
     "pins": "node scripts/check-exact-pins.mjs",
+    "env:check": "varlock load",
     "biome": "biome check .",
     "lint": "eslint .",
     "typecheck": "tsc --project tsconfig.json",
     "deps": "depcruise --config .dependency-cruiser.cjs .",
-    "check": "npm run pins && npm run biome && npm run lint && npm run typecheck && npm run deps",
+    "check": "npm run pins && npm run env:check && npm run biome && npm run lint && npm run typecheck && npm run deps",
     "test": "node --test \"tests/**/*.test.mjs\"",
     "acceptance": "bash scripts/acceptance-cold-clone.sh",
     "prepare": "lefthook install"
@@ -29,6 +30,7 @@
     "eslint": "10.11.0",
     "eslint-plugin-codebase-ai-rules": "github:JakubSzwajka/eslint-plugin-codebase-ai-rules#012daeb0d1809f0e026b9425dddc9a42a77c3328",
     "lefthook": "2.1.14",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "varlock": "1.20.0"
   }
 }

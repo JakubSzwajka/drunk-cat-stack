@@ -1,6 +1,6 @@
 # drunk-cat-stack
 
-drunk-cat-stack is config files you copy into a TypeScript repo so `npm run check` fails on structure rules instead of leaving them to review. It uses maintained tools as-is: Biome, ESLint with [`eslint-plugin-codebase-ai-rules`](https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules), TypeScript, and Dependency Cruiser. CI runs `npm ci`, `npm run check`, and `npm test`, nothing else. A [fence](#fence) stops agents from skipping those checks at commit time.
+drunk-cat-stack is config files you copy into a TypeScript repo so `npm run check` fails on structure rules instead of leaving them to review. It uses maintained tools as-is: Biome, ESLint with [`eslint-plugin-codebase-ai-rules`](https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules), TypeScript, Dependency Cruiser, and [varlock](https://varlock.dev) for the environment. CI runs `npm ci`, `npm run check`, and `npm test`, nothing else. A [fence](#fence) stops agents from skipping those checks at commit time.
 
 It is a GitHub template. Create a repo from it with `gh repo create <name> --template JakubSzwajka/drunk-cat-stack`.
 
@@ -9,6 +9,7 @@ It is a GitHub template. Create a repo from it with `gh repo create <name> --tem
 | Rule | Tool | Config file | Change when adapting |
 | --- | --- | --- | --- |
 | Every dependency is an exact version or a full commit SHA | `scripts/check-exact-pins.mjs` | `package.json`, `.npmrc` | Nothing |
+| Every declared environment variable resolves and matches its type | varlock `load` (`npm run env:check`) | `.env.schema`, `.varlock/config.json` | The variables in `.env.schema` |
 | Formatting: spaces, indent 2, line width 100 | Biome formatter | `biome.json` | Your house style, if different |
 | No `export *` | Biome `noReExportAll` | `biome.json` | Nothing |
 | No non-null assertions (`x!`) | Biome `noNonNullAssertion` | `biome.json` | Nothing |
@@ -26,6 +27,22 @@ It is a GitHub template. Create a repo from it with `gh repo create <name> --tem
 | Production code never imports test files | Dependency Cruiser `production-does-not-import-tests` | `.dependency-cruiser.cjs` | `SOURCE_ROOT`, `TEST_PATH` |
 
 Biome, ESLint, and Dependency Cruiser all skip `node_modules`, `dist`, `coverage`, and `generated`.
+
+## Environment
+
+`.env.schema` declares every environment variable the code reads. It holds no secret values. Local values, secrets included, go in `.env.local`, which git ignores. `npm run env:check` runs `varlock load`, which checks each variable against its type and fails when a required one is empty. It runs inside `npm run check`, right after the pin check. Varlock prints the resolved values and hides the ones marked `@sensitive`.
+
+Run a command with the values injected:
+
+```sh
+npx varlock run -- <cmd>
+```
+
+Every variable starts as optional and sensitive (`@defaultRequired=false`, `@defaultSensitive=true`). CI has no `.env.local`, so a required variable needs a default in the schema or a value set in CI.
+
+Varlock sends anonymous usage data by default. `.varlock/config.json` turns that off for this repo. To confirm, run `DEBUG=varlock:telemetry npx varlock load` and look for `telemetry opted out - config file (project config)`.
+
+Type generation (`varlock codegen`) is off. Nothing here reads the environment yet, and a generated file would have to exist before `tsc` runs.
 
 ## Review only
 
@@ -70,12 +87,13 @@ The fence is adapted from [rat-stack](https://github.com/joelhooks/rat-stack) by
 
 1. Copy `biome.json`, `eslint.config.mjs`, `tsconfig.base.json`, `.dependency-cruiser.cjs`, and `.github/workflows/ci.yml`.
 2. Copy the `scripts` and `devDependencies` from `package.json`, plus the `engines` and `packageManager` fields. Keep the plugin pinned to a full commit SHA. To upgrade, change the SHA and run `npm install`.
-3. Copy the fence: `.npmrc`, `.nvmrc`, `lefthook.yml`, `scripts/`, `tests/`, `.claude/settings.json`, `.pi/extensions/git-interceptor.ts`, and `NOTICE`.
-4. Copy `AGENTS.md` and `CLAUDE.md`, then rewrite the layer rules in `AGENTS.md` for your project. Write your own `VISION.md`.
-5. Set the constants at the top of `.dependency-cruiser.cjs`: `SOURCE_ROOT`, `DELIVERY_ROOT`, `SERVER_ROOT`, `USE_CASES_ROOT`, `MODULES_ROOT`, `BOOKINGS_MODULE_ROOT`, `PACKAGE_NAMESPACE`, `TSCONFIG`, and `TEST_PATH` if your tests live elsewhere. Keep `(?:/|$)` at the end of each root, so `modules-legacy` does not count as `modules`.
-6. Copy `bookings-public-entry-only` once per module that hides its internals, with its own root constant. One regular expression cannot compare source and target module names.
-7. Map each public alias in your `tsconfig.json`, the way this repo maps `@hosti/bookings` to `modules/bookings/index.ts`. Add no deep alias.
-8. Run `npm install`, which also installs the pre-commit hook. Then run `npm run check` and `npm test`.
+3. Copy `.env.schema` and `.varlock/config.json`, and the `.env` lines from `.gitignore`. Replace `APP_ENV` in `.env.schema` with the variables your code reads.
+4. Copy the fence: `.npmrc`, `.nvmrc`, `lefthook.yml`, `scripts/`, `tests/`, `.claude/settings.json`, `.pi/extensions/git-interceptor.ts`, and `NOTICE`.
+5. Copy `AGENTS.md` and `CLAUDE.md`, then rewrite the layer rules in `AGENTS.md` for your project. Write your own `VISION.md`.
+6. Set the constants at the top of `.dependency-cruiser.cjs`: `SOURCE_ROOT`, `DELIVERY_ROOT`, `SERVER_ROOT`, `USE_CASES_ROOT`, `MODULES_ROOT`, `BOOKINGS_MODULE_ROOT`, `PACKAGE_NAMESPACE`, `TSCONFIG`, and `TEST_PATH` if your tests live elsewhere. Keep `(?:/|$)` at the end of each root, so `modules-legacy` does not count as `modules`.
+7. Copy `bookings-public-entry-only` once per module that hides its internals, with its own root constant. One regular expression cannot compare source and target module names.
+8. Map each public alias in your `tsconfig.json`, the way this repo maps `@hosti/bookings` to `modules/bookings/index.ts`. Add no deep alias.
+9. Run `npm install`, which also installs the pre-commit hook. Then run `npm run check` and `npm test`.
 
 TypeScript stays on 6.0.3 because Dependency Cruiser 18.4.0 skips the TypeScript import graph on TypeScript 7. Recheck when Dependency Cruiser supports 7.
 
@@ -96,6 +114,7 @@ server ───┘          └───> modules
 ```sh
 npm ci
 npm run check
+npm run env:check
 npm test
 npm run fix
 npm run format

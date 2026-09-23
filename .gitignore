@@ -2,3 +2,7 @@
 /dist/
 /coverage/
 /generated/
+# varlock: .env.schema is checked in; local values are not.
+.env
+.env.local
+.env.*.local

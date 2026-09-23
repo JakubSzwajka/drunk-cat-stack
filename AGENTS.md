@@ -7,7 +7,9 @@ This file is the law for agents and people working in this repo, and in any proj
 | Command | What it does |
 | --- | --- |
 | `npm ci` | Install from the lockfile. Also installs the lefthook pre-commit hook. |
-| `npm run check` | Exact pins, Biome, ESLint, TypeScript, Dependency Cruiser. |
+| `npm run check` | Exact pins, environment schema, Biome, ESLint, TypeScript, Dependency Cruiser. |
+| `npm run env:check` | `varlock load`: resolve and validate every variable in `.env.schema`. |
+| `npx varlock run -- <cmd>` | Run a command with the environment values injected. |
 | `npm test` | Node test runner over `tests/**/*.test.mjs`. |
 | `npm run fix` | Apply Biome formatting and safe lint fixes. |
 | `npm run format` | Apply Biome formatting only. |
@@ -31,6 +33,12 @@ The table under "What is enforced" in `README.md` lists every rule, its tool, an
 
 The "Review only" section in `README.md` lists what no tool here checks. A green `npm run check` says nothing about those. Point them out in review instead of claiming a check covers them.
 
+## Environment
+
+- Declare every environment variable the code reads in `.env.schema`. Put no secret values there.
+- Secrets live only in `.env.local`. Never commit `.env.local` or any `.env.*.local` file.
+- Varlock telemetry stays off through `.varlock/config.json`. Check with `DEBUG=varlock:telemetry npx varlock load`.
+
 ## Pins
 
 Every dependency in `package.json` is an exact version. A GitHub dependency is pinned to a full 40-character commit SHA. `.npmrc` sets `save-exact=true`, so `npm install <pkg>` writes an exact pin. `npm run check` fails on `^`, `~`, ranges, tags, and branch names. Node is pinned in `.nvmrc`, and CI reads it from there.
@@ -49,12 +57,14 @@ Safe without asking:
 - code changes that keep `npm run check` and `npm test` green;
 - new or tighter tests;
 - docs edits in `README.md`, `AGENTS.md`, and `CONTEXT.md`;
-- tightening a lint or dependency rule.
+- tightening a lint or dependency rule;
+- adding a variable to `.env.schema`.
 
 Ask the owner first:
 
 - adding, removing, or bumping a dependency or the Node version;
 - any change to `biome.json`, `eslint.config.mjs`, `.dependency-cruiser.cjs`, `tsconfig*.json`, `lefthook.yml`, `.npmrc`, CI, or the hook policy that loosens a rule;
 - deleting tests;
+- changing how secrets are handled: `@sensitive`, `.env.local`, the `.gitignore` env lines, or `.varlock/config.json`;
 - changing `VISION.md`;
 - commit, push, or anything that writes outside this repo.
