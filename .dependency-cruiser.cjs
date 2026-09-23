@@ -1,6 +1,3 @@
-/** @type {import('dependency-cruiser').IConfiguration} */
-
-// Adapt these constants before copying this config. They are the only repository-specific paths.
 const SOURCE_ROOT = "^examples/hosti-after/src(?:/|$)";
 const DELIVERY_ROOT = "^examples/hosti-after/src/delivery(?:/|$)";
 const SERVER_ROOT = "^examples/hosti-after/src/server(?:/|$)";
@@ -86,6 +83,10 @@ module.exports = {
     tsPreCompilationDeps: "specify",
     tsConfig: {
       fileName: TSCONFIG,
+    },
+    enhancedResolveOptions: {
+      exportsFields: ["exports"],
+      conditionNames: ["import", "require", "node", "default"],
     },
   },
 };

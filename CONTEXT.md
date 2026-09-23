@@ -1,6 +1,8 @@
 # Context
 
-This repository is a copyable configuration example. It is not a package, checker, or source of product code.
+This repository, drunk-cat-stack, is a copyable configuration example. It is not a package, checker, or source of product code.
+
+The comment rule comes from the external `eslint-plugin-codebase-ai-rules` package, installed from GitHub at a pinned commit. No rule code lives in this repository.
 
 A **module** is a capability with one **interface** and a private **implementation**. The interface is the small set of imports callers need. The implementation stays behind it. A **seam** is the location of that interface. **Depth** is the useful behavior a caller gets for the amount of interface it must learn.
 

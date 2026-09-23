@@ -1,5 +1,5 @@
 {
-  "name": "codebase-ai-rules",
+  "name": "drunk-cat-stack",
   "version": "0.0.0",
   "private": true,
   "description": "Copyable maintained-tool configuration for deterministic code-structure rules",
@@ -11,13 +11,16 @@
   "scripts": {
     "format": "biome format --write .",
     "biome": "biome check .",
-    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "typecheck": "tsc --project tsconfig.json",
     "deps": "depcruise --config .dependency-cruiser.cjs .",
-    "check": "npm run biome && npm run typecheck && npm run deps"
+    "check": "npm run biome && npm run lint && npm run typecheck && npm run deps"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
     "dependency-cruiser": "18.4.0",
+    "eslint": "^10.11.0",
+    "eslint-plugin-codebase-ai-rules": "github:JakubSzwajka/eslint-plugin-codebase-ai-rules#012daeb0d1809f0e026b9425dddc9a42a77c3328",
     "typescript": "6.0.3"
   }
 }
