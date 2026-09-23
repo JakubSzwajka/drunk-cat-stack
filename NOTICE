@@ -7,7 +7,7 @@ The hook-bypass fence is adapted from rat-stack
 - scripts/vcs-command-policy.mjs
 - scripts/hooks/block-git-no-verify.mjs
 - .pi/extensions/git-interceptor.ts
-- .claude/settings.json
+- .agents/settings.json (from .claude/settings.json)
 - scripts/acceptance-cold-clone.sh
 - lefthook.yml
 

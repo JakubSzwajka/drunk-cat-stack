@@ -143,7 +143,7 @@ lefthook runs `pnpm check` and then `pnpm test` before each commit. `git commit 
 git commit ──> lefthook pre-commit ──> pnpm check ──> pnpm test
 
 agent bash call
-  Claude Code  .claude/settings.json PreToolUse ─> scripts/hooks/block-git-no-verify.mjs ─┐
+  Claude Code  .agents/settings.json PreToolUse ─> scripts/hooks/block-git-no-verify.mjs ─┐
   Pi           .pi/extensions/git-interceptor.ts tool_call ──────────────────────────────┤
                                                                                         v
                                                           scripts/vcs-command-policy.mjs
@@ -154,6 +154,8 @@ agent bash call
 The policy blocks a `git` command that contains `--no-verify` or `core.hooksPath`, a `git commit` with `-n`, and any command that sets `LEFTHOOK=0`. It matches `--no-verify` anywhere in a `git` command, so `git commit -m "skip --no-verify"` is blocked too. The shell strips the quotes from `"--no-verify"` and passes a real flag, and telling a flag from message text is not worth the risk. Reword the message. `echo --no-verify` and `git merge --no-verify-signatures` pass. `tests/` holds the full case list.
 
 In Pi, the extension also prefixes every allowed `git` or `jj` call with no-op editors (`GIT_EDITOR=:` and the like), so a rebase or merge never waits on an editor nobody sees. The Claude Code hook only denies. A PreToolUse hook that rewrites a command must also answer allow, which skips the permission prompt, or ask, which prompts on every `git` call.
+
+Pi is the harness this repo uses. Claude Code reads hooks only from `.claude/settings.json`, so it does not load `.agents/settings.json`. To turn the Claude Code block on, copy or link that file to `.claude/settings.json`.
 
 This raises the floor. It does not stop an agent that writes the command into a script file and runs that.
 
@@ -168,8 +170,8 @@ Start from the template, or copy the files into an existing pnpm workspace.
 1. Copy the root config: `biome.json`, `eslint.config.mjs`, `tsconfig.base.json`, `.dependency-cruiser.cjs`, `turbo.json`, `pnpm-workspace.yaml`, and `.github/workflows/ci.yml`.
 2. Copy the `scripts`, `devDependencies`, `engines`, and `packageManager` fields from the root `package.json`. Keep the plugin pinned to a full commit SHA. To upgrade, change the SHA and run `pnpm install`. Keep every Effect package on the same version in every workspace package.
 3. Copy `.env.schema` and `.varlock/config.json`, and the `.env` lines from `.gitignore`. Replace `APP_ENV` in `.env.schema` with the variables your code reads.
-4. Copy the fence: `.nvmrc`, `lefthook.yml`, `scripts/`, `tests/`, `.claude/settings.json`, `.pi/extensions/git-interceptor.ts`, and `NOTICE`. Copy `skills/` and the `.agent_sources` line from `.gitignore` if your agents should use them.
-5. Copy `AGENTS.md` and `CLAUDE.md`, then rewrite the workspace and layer rules in `AGENTS.md` for your project. Write your own `VISION.md`.
+4. Copy the fence: `.nvmrc`, `lefthook.yml`, `scripts/`, `tests/`, `.agents/settings.json`, `.pi/extensions/git-interceptor.ts`, and `NOTICE`. Copy `skills/` and the `.agent_sources` line from `.gitignore` if your agents should use them.
+5. Copy `AGENTS.md`, then rewrite the workspace and layer rules in `AGENTS.md` for your project. Write your own `VISION.md`.
 6. Rename the scope. Replace `@hosti/` in every `package.json` `name` and dependency, in the imports, in the `Context.Service` keys, and in `PACKAGE_NAMESPACE` in `.dependency-cruiser.cjs`. Then run `pnpm install` so the lockfile follows.
 7. Check the constants at the top of `.dependency-cruiser.cjs`. The defaults match `apps/<name>/src/{delivery,server,use-cases}` and `packages/<name>/src/index.ts`. Change `DELIVERY_ROOT`, `SERVER_ROOT`, `USE_CASES_ROOT`, `PUBLIC_ENTRY`, or `TEST_PATH` if your folders differ. Keep `(?:/|$)` at the end of each root, so `delivery-legacy` does not count as `delivery`.
 8. Run `pnpm install`, which patches `tsc` and installs the pre-commit hook. Then run `pnpm check` and `pnpm test`.

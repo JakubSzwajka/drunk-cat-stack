@@ -78,7 +78,7 @@ Never add `shamefully-hoist`, `nodeLinker: hoisted`, or a broad `publicHoistPatt
 - lefthook runs `pnpm check` and then `pnpm test` before each commit.
 - If a hook fails, fix the failure. Never weaken or bypass a hook.
 - Never run `git ... --no-verify`, `git commit -n`, `LEFTHOOK=0`, or change `core.hooksPath`.
-- Claude Code (`.claude/settings.json`) and Pi (`.pi/extensions/git-interceptor.ts`) block those commands. Both use `scripts/vcs-command-policy.mjs`.
+- Pi (`.pi/extensions/git-interceptor.ts`) blocks those commands through `scripts/vcs-command-policy.mjs`. `.agents/settings.json` holds the same hook in Claude Code format. Claude Code does not load it from there.
 
 ## Safe vs needs approval
 
