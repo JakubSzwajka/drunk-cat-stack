@@ -43,12 +43,12 @@ run_step "clone" git clone --quiet --depth 1 "$source_url" "$tmp"
 cd "$tmp"
 printf 'commit: %s\n' "$(git rev-parse HEAD)"
 
-run_step "npm ci" npm ci
+run_step "pnpm install" pnpm install --frozen-lockfile
 if [[ ! -f .git/hooks/pre-commit ]]; then
   step="hook install"
-  fail "npm ci did not install the lefthook pre-commit hook"
+  fail "pnpm install did not install the lefthook pre-commit hook"
 fi
-run_step "npm run check" npm run check
-run_step "npm test" npm test
+run_step "pnpm check" pnpm check
+run_step "pnpm test" pnpm test
 
 printf 'cold-clone acceptance passed\n'

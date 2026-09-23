@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Shallow-clone reference source for agents into .agent_sources/github.com/<owner>/<repo>.
-# Reference only, never a runtime dependency. Not part of `npm run check`.
-# Usage: npm run vendor:agent-sources [-- --refresh]
+# Reference only, never a runtime dependency. Not part of `pnpm check`.
+# Usage: pnpm vendor:agent-sources [--refresh]
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -46,8 +46,20 @@ EOF
   echo "  -> ${dest}"
 }
 
-# The ref follows the pin in package.json, so bumping effect there bumps the mirror.
-EFFECT_VERSION="$(node -p "require('${ROOT}/package.json').dependencies.effect")"
+# The ref follows the effect pin in the workspace package.json files, so a bump there bumps the mirror.
+EFFECT_VERSION="$(cd "$ROOT" && node -e '
+const { globSync, readFileSync } = require("node:fs");
+const pins = new Set(
+  globSync(["apps/*/package.json", "packages/*/package.json"])
+    .map((path) => JSON.parse(readFileSync(path, "utf8")).dependencies?.effect)
+    .filter((pin) => pin !== undefined),
+);
+if (pins.size !== 1) {
+  console.error(`expected one effect pin across the workspace, found: ${[...pins].join(", ") || "none"}`);
+  process.exit(1);
+}
+console.log([...pins][0]);
+')"
 
 clone_source Effect-TS effect https://github.com/Effect-TS/effect.git "effect@${EFFECT_VERSION}"
 

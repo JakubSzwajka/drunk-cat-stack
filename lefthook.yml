@@ -1,11 +1,11 @@
 # Pre-commit fence. Agent hooks block --no-verify; see AGENTS.md.
-# Installed by the prepare script on npm install and npm ci.
+# Installed by the prepare script on pnpm install.
 pre-commit:
   piped: true
   commands:
     check:
       priority: 1
-      run: npm run check
+      run: pnpm check
     test:
       priority: 2
-      run: npm test
+      run: pnpm test

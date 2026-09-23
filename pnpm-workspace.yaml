@@ -1,0 +1,32 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+engineStrict: true
+saveExact: true
+saveWorkspaceProtocol: true
+
+# Supply-chain guard: a version must be one day old before pnpm installs it.
+# Setting it explicitly makes the check strict, so a young version fails the install.
+minimumReleaseAge: 1440
+
+# Exact pins allowed through the release-age check, one entry per version.
+# A bump replaces its entry. Effect 4 release candidates ship every few days.
+minimumReleaseAgeExclude:
+  - effect@4.0.0-rc.117
+  - "@effect/vitest@4.0.0-rc.117"
+
+# The comment plugin's @typescript-eslint/parser peers on TypeScript below 6.1.
+# Giving the plugin its own TypeScript 6.0.3 satisfies that peer inside its subtree.
+# The root and every workspace package keep TypeScript 7.
+packageExtensions:
+  eslint-plugin-codebase-ai-rules:
+    dependencies:
+      typescript: 6.0.3
+
+# No dependency runs install scripts. The root `prepare` script patches tsc and installs the hook.
+# @swc/core ships its native binary as an optional dependency; its script only adds a wasm fallback.
+# lefthook's script runs `lefthook install`, which `prepare` already runs.
+allowBuilds:
+  "@swc/core": false
+  lefthook: false

@@ -1,7 +1,8 @@
-/node_modules/
-/dist/
-/coverage/
-/generated/
+node_modules/
+dist/
+coverage/
+generated/
+.turbo/
 /.agent_sources/
 # varlock: .env.schema is checked in; local values are not.
 .env

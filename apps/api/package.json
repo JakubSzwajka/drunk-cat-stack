@@ -1,0 +1,19 @@
+{
+  "name": "@hosti/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hosti/bookings": "workspace:0.0.0",
+    "effect": "4.0.0-rc.117"
+  },
+  "devDependencies": {
+    "@effect/vitest": "4.0.0-rc.117",
+    "typescript": "7.0.2",
+    "vitest": "5.0.1"
+  }
+}

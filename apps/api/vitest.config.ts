@@ -1,10 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  resolve: {
-    tsconfigPaths: true,
-  },
   test: {
-    include: ["examples/**/*.test.ts"],
+    include: ["src/**/*.test.ts"],
   },
 });
