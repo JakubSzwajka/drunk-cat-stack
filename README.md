@@ -54,6 +54,7 @@ Packages export TypeScript source, so there is no build step. Turborepo caching 
 | Filename is kebab-case or matches an export | Biome `useFilenamingConvention` | `biome.json` | Nothing |
 | Files over 300 lines (warn only) | Biome `noExcessiveLinesPerFile` | `biome.json` | `maxLines`, if you want another limit |
 | Comments are one line and sit inside a function or class body; tool directives excepted | ESLint `codebase-ai-rules/comment-discipline` | `eslint.config.mjs` | The `ignores` list; the plugin commit pin in `package.json` |
+| A relative Markdown link, image, or link reference definition targets a git-tracked path, exact case | ESLint `codebase-ai-rules/no-broken-relative-links` | `eslint.config.mjs` | `roots`, if a subtree is published as its own repository or site |
 | Strict types, plus `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `erasableSyntaxOnly`, in every workspace package | TypeScript 7, run by `turbo run typecheck` | `tsconfig.base.json`, each package's `tsconfig.json`, `turbo.json` | Nothing |
 | No floating Effects, in code or in Vitest callbacks | Effect diagnostics `floatingEffect`, `floatingEffectInVitest` | `tsconfig.base.json` plugin block | Nothing |
 | Expected errors are typed: no global `Error`, `unknown`, or `any` in an Effect error channel; no try/catch in `Effect.gen` | Effect diagnostics `globalErrorInEffectFailure`, `globalErrorInEffectCatch`, `unknownInEffectCatch`, `anyUnknownInErrorContext`, `tryCatchInEffectGen` | `tsconfig.base.json` plugin block | Nothing |
