@@ -49,7 +49,7 @@ The build runs before the tag, so a failed build never leaves a tag behind.
 4. [ ] Repo variables: `DOKPLOY_BASE_URL`, `DOKPLOY_APPLICATION_ID`, and `APP_URL`.
 5. [ ] A Dokploy application with a Docker image source, able to pull from GHCR.
 
-The steps that switch a Dokploy app over to this profile are not in this repo. They live in the operator's infra-manager skill, in its devops mode.
+The steps that switch a Dokploy app over to this profile are not in this repo. They live in the operator's `release` skill (its devops reference).
 
 ## Cut a release
 
