@@ -4,7 +4,7 @@ drunk-cat-stack is a TypeScript monorepo template whose `pnpm check` fails on st
 
 It is a GitHub template. Create a repo from it with `gh repo create <name> --template JakubSzwajka/drunk-cat-stack`.
 
-It also carries the reference copy of the gated release workflows, which build, tag, and deploy to Dokploy, and only run by hand. See [`docs/release.md`](docs/release.md) to adopt them.
+It also carries the reference copy of the release workflow, one file that builds, tags, and deploys to Dokploy, and only runs by hand. See [`docs/release.md`](docs/release.md) to adopt it.
 
 ## Layout
 
