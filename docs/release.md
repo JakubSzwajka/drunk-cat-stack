@@ -76,7 +76,7 @@ A container rollback is not a database rollback. If the release ran a migration,
 
 These sit at the top of the workflow file, or on the job:
 
-- `DOCKERFILE` and `DOCKER_CONTEXT`: the Dockerfile path and the build context.
+- `DOCKERFILE` and `BUILD_CONTEXT`: the Dockerfile path and the build context.
 - `RELEASE_MARK_LATEST`: `"true"` or `"false"`, passed to `gh release create --latest`. Use `"false"` when another release line in the repo, such as `cli-v*`, should keep the Latest badge.
 - `HEALTH_PATH`: the health path, if the project changes it and keeps the body contract.
 - `runs-on`: the runner labels.
