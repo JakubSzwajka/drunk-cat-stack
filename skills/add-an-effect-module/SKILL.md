@@ -70,7 +70,7 @@ Delivery returns an Effect. The entry point that owns the runtime runs it. Do no
 
 ## 5. Test it
 
-Put tests beside the code as `<file>.test.ts`. Use `@effect/vitest`:
+Put each test in a `tests/` folder inside the folder it tests, as `<file>.test.ts`: `packages/<name>/src/tests/`, `apps/<app>/src/use-cases/tests/`, `apps/<app>/src/delivery/<kind>/tests/`. A package's own tests import `../index.js`, never `../internal/`. `pnpm check` fails on a test anywhere else, and on a test that imports `src/internal/`. Use `@effect/vitest`:
 
 - `it.layer(<Service>.<layer>)` to provide the service;
 - `it.effect` for each case;

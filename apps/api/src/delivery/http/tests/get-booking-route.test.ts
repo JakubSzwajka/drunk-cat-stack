@@ -1,7 +1,7 @@
 import { Bookings } from "@hosti/bookings";
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import { getBookingRoute } from "./get-booking-route.js";
+import { getBookingRoute } from "../get-booking-route.js";
 
 it.layer(Bookings.fromRecords([{ id: "b-1", guestName: "Ada" }]))("getBookingRoute", (test) => {
   test.effect("answers 200 with the booking", () =>

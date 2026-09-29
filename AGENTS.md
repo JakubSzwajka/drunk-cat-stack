@@ -38,6 +38,7 @@ The table under "What is enforced" in `README.md` lists every rule, its tool, an
 - Delivery and server never import each other.
 - Use-cases import packages. They never import delivery or server.
 - No import cycles. No deep package imports. Production code never imports tests.
+- A test file sits directly in a `tests/` folder inside the folder it tests, such as `src/use-cases/tests/show-booking.test.ts`. Tests never import any package's `src/internal/`; a package's own tests import its `src/index.ts`.
 
 ## Effect
 

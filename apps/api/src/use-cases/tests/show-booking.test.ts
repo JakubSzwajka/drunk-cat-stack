@@ -1,7 +1,7 @@
 import { Bookings } from "@hosti/bookings";
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import { showBooking } from "./show-booking.js";
+import { showBooking } from "../show-booking.js";
 
 it.layer(Bookings.fromRecords([{ id: "b-1", guestName: "Ada" }]))("showBooking", (test) => {
   test.effect("formats the booking", () =>

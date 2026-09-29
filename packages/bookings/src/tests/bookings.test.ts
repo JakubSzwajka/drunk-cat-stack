@@ -1,6 +1,6 @@
 import { expect, it } from "@effect/vitest";
 import { Effect } from "effect";
-import { Bookings } from "./index.js";
+import { Bookings } from "../index.js";
 
 const records = [{ id: "b-1", guestName: "Ada" }];
 

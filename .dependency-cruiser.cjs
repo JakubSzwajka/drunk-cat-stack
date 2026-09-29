@@ -8,6 +8,10 @@ const DELIVERY_ROOT = "^apps/[^/]+/src/delivery(?:/|$)";
 const SERVER_ROOT = "^apps/[^/]+/src/server(?:/|$)";
 const USE_CASES_ROOT = "^apps/[^/]+/src/use-cases(?:/|$)";
 const TEST_PATH = "(?:^|/)(?:tests?|__tests__)(?:/|$)|[.](?:test|spec)[.][^/]+$";
+const TEST_FILE = "^(?:apps|packages)/[^/]+/.*[.](?:test|spec)[.][^/]+$";
+const TEST_FILE_IN_TESTS_DIR =
+  "^(?:apps|packages)/[^/]+/src/(?:tests|.*/tests)/[^/]+[.](?:test|spec)[.][^/]+$";
+const PACKAGE_INTERNALS = "^packages/[^/]+/src/internal(?:/|$)";
 const PACKAGE_NAMESPACE = "^@hosti/";
 
 const EXCLUDED_PATH =
@@ -77,6 +81,22 @@ module.exports = {
       severity: "error",
       from: { path: SOURCE_ROOT, pathNot: TEST_PATH },
       to: { path: TEST_PATH },
+    },
+    {
+      name: "tests-live-in-tests-dir",
+      severity: "error",
+      module: {
+        path: TEST_FILE,
+        pathNot: TEST_FILE_IN_TESTS_DIR,
+        numberOfDependentsLessThan: 100,
+      },
+      from: {},
+    },
+    {
+      name: "tests-do-not-import-internals",
+      severity: "error",
+      from: { path: TEST_PATH },
+      to: { path: PACKAGE_INTERNALS },
     },
     {
       name: "no-unresolved-imports",

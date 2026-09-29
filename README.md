@@ -12,14 +12,15 @@ It also carries the reference copy of the release workflow, one file that builds
 .
 ├── apps/
 │   └── api/                @hosti/api: delivery, server, use-cases
-│       ├── src/delivery/
-│       ├── src/use-cases/
+│       ├── src/delivery/   http/tests/ holds the handler tests
+│       ├── src/use-cases/  tests/ holds the use-case tests
 │       ├── package.json    depends on "@hosti/bookings": "workspace:0.0.0"
 │       └── tsconfig.json   extends ../../tsconfig.base.json
 ├── packages/
 │   └── bookings/           @hosti/bookings: one Effect module
 │       ├── src/index.ts    the only path in "exports"
 │       ├── src/internal/   private to the package
+│       ├── src/tests/      tests, through the public entry
 │       ├── package.json
 │       └── tsconfig.json   extends ../../tsconfig.base.json
 ├── pnpm-workspace.yaml     workspace folders and install policy
@@ -74,10 +75,14 @@ Packages export TypeScript source, so there is no build step. Turborepo caching 
 | No deep package imports such as `@hosti/bookings/internal/x` | Dependency Cruiser `no-unresolved-deep-package-imports` | `.dependency-cruiser.cjs` | `PACKAGE_NAMESPACE` |
 | No unresolved imports, including a workspace package the importer does not declare | Dependency Cruiser `no-unresolved-imports` | `.dependency-cruiser.cjs` | Nothing |
 | Production code never imports test files | Dependency Cruiser `production-does-not-import-tests` | `.dependency-cruiser.cjs` | `SOURCE_ROOT`, `TEST_PATH` |
+| A test file (`*.test.*`, `*.spec.*`) under `apps/` or `packages/` sits directly in a `tests/` folder inside `src/`, next to the code it tests | Dependency Cruiser `tests-live-in-tests-dir` | `.dependency-cruiser.cjs` | `TEST_FILE`, `TEST_FILE_IN_TESTS_DIR` |
+| Tests never import a package's `src/internal/`, not even the package's own tests | Dependency Cruiser `tests-do-not-import-internals` | `.dependency-cruiser.cjs` | `TEST_PATH`, `PACKAGE_INTERNALS` |
 | The fence behaves as documented | Node test runner over `tests/**/*.test.mjs` (`pnpm test`) | `package.json` | Nothing |
-| Example code behaves as documented, with Effects run only by `it.effect` and `it.layer` | Vitest with `@effect/vitest` in each workspace package, run by `turbo run test` (`pnpm test`) | each package's `vitest.config.ts`, `turbo.json` | `test.include` |
+| Example code behaves as documented, with Effects run only by `it.effect` and `it.layer` | Vitest with `@effect/vitest` in each workspace package, run by `turbo run test` (`pnpm test`) | each package's `vitest.config.ts` (`test.include` runs only `src/**/tests/*.test.ts`), `turbo.json` | `test.include` |
 
 Biome, ESLint, and Dependency Cruiser all skip `node_modules`, `dist`, `coverage`, `generated`, and `.agent_sources`. Dependency Cruiser also skips `.turbo`.
+
+`tests-live-in-tests-dir` is a module rule, not a dependency rule. Dependency Cruiser skips `node_modules`, so a test that imports only `@effect/vitest` has no dependency left to match. The rule sets `numberOfDependentsLessThan: 100`, which every test file meets, so it checks each test file on its own, whatever it imports.
 
 ## TypeScript 7 and Effect
 
@@ -133,7 +138,7 @@ No tool here can check these without guessing:
 - whether all Effect packages share one version across the workspace (pins only checks that each is exact; `pnpm vendor:agent-sources` fails on a split `effect` pin, but it is not part of `check`);
 - whether a cast has an allowed intent;
 - folder naming, sibling counts, grouping, module depth, and seam placement, including whether a new capability should be its own package;
-- test placement, and whether a module's own tests use only its interface;
+- whether a module's own tests use only its interface (the check bans only `src/internal/`; a test can still import another file beside `src/index.ts`, such as `src/types.ts`);
 - whether a frontend library solves a named pain;
 - React semantics beyond the filename matching an export;
 - compiler option changes, because TypeScript accepts `strict: true` next to `strictNullChecks: false`.
@@ -176,7 +181,7 @@ Start from the template, or copy the files into an existing pnpm workspace.
 4. Copy the fence: `.nvmrc`, `lefthook.yml`, `scripts/`, `tests/`, `.agents/settings.json`, `.pi/extensions/git-interceptor.ts`, and `NOTICE`. Copy `skills/` and the `.agent_sources` line from `.gitignore` if your agents should use them.
 5. Copy `AGENTS.md`, then rewrite the workspace and layer rules in `AGENTS.md` for your project. Write your own `VISION.md`.
 6. Rename the scope. Replace `@hosti/` in every `package.json` `name` and dependency, in the imports, in the `Context.Service` keys, and in `PACKAGE_NAMESPACE` in `.dependency-cruiser.cjs`. Then run `pnpm install` so the lockfile follows.
-7. Check the constants at the top of `.dependency-cruiser.cjs`. The defaults match `apps/<name>/src/{delivery,server,use-cases}` and `packages/<name>/src/index.ts`. Change `DELIVERY_ROOT`, `SERVER_ROOT`, `USE_CASES_ROOT`, `PUBLIC_ENTRY`, or `TEST_PATH` if your folders differ. Keep `(?:/|$)` at the end of each root, so `delivery-legacy` does not count as `delivery`.
+7. Check the constants at the top of `.dependency-cruiser.cjs`. The defaults match `apps/<name>/src/{delivery,server,use-cases}` and `packages/<name>/src/index.ts`. Change `DELIVERY_ROOT`, `SERVER_ROOT`, `USE_CASES_ROOT`, `PUBLIC_ENTRY`, `TEST_PATH`, `TEST_FILE_IN_TESTS_DIR`, or `PACKAGE_INTERNALS` if your folders differ. Keep `(?:/|$)` at the end of each root, so `delivery-legacy` does not count as `delivery`.
 8. Run `pnpm install`, which patches `tsc` and installs the pre-commit hook. Then run `pnpm check` and `pnpm test`.
 
 ### Add an app
@@ -203,7 +208,7 @@ apps/api
       └──────────────────────> @hosti/bookings  (types only)
 ```
 
-The bookings package exposes a `Bookings` service and a typed `BookingNotFound` error through `src/index.ts`, the only path in its `exports`. The `showBooking` use-case in `apps/api` yields that service. The HTTP handler maps `BookingNotFound` to a 404 once, so its error channel is `never`. `apps/api` has no server code yet, so the diagram shows none. The server layer rules still apply to `src/server/` once you add it. Tests sit beside each file and run under `it.effect`.
+The bookings package exposes a `Bookings` service and a typed `BookingNotFound` error through `src/index.ts`, the only path in its `exports`. The `showBooking` use-case in `apps/api` yields that service. The HTTP handler maps `BookingNotFound` to a 404 once, so its error channel is `never`. `apps/api` has no server code yet, so the diagram shows none. The server layer rules still apply to `src/server/` once you add it. Tests sit in a `tests/` folder inside the folder they test, such as `src/use-cases/tests/`, and run under `it.effect`.
 
 ## Commands
 
