@@ -1,6 +1,6 @@
 # Context
 
-This repository, drunk-cat-stack, is a template. It is not a published library, a checker, or a source of product code.
+This repository, house-rules-stack, is a template. It is not a published library, a checker, or a source of product code.
 
 The **house plugin** is the external `@jakubszwajka/house-rules` package, installed from GitHub at a pinned commit. It owns the **house rules** and the **presets**: the ESLint rules, the TypeScript and Biome presets, the Dependency Cruiser `layout()` factory, and the `house-rules-pins` bin. No rule code and no copy of a preset lives in this repository.
 

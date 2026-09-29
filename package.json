@@ -1,5 +1,5 @@
 {
-  "name": "drunk-cat-stack",
+  "name": "house-rules-stack",
   "version": "0.0.0",
   "private": true,
   "description": "Monorepo template with thin configs over @jakubszwajka/house-rules for deterministic code-structure rules",

@@ -1,6 +1,6 @@
 # Agent instructions
 
-This file is the law for agents and people working in this repo, and in any project made from the drunk-cat-stack template. Read `VISION.md` for why. It does not override this file. Read `CONTEXT.md` for the words this repo uses.
+This file is the law for agents and people working in this repo, and in any project made from the house-rules-stack template. Read `VISION.md` for why. It does not override this file. Read `CONTEXT.md` for the words this repo uses.
 
 The house rules and the tool configs come from the pinned plugin `@jakubszwajka/house-rules`. This repo keeps thin configs that extend its presets, the project values such as the `@hosti/` scope, and the files no tool can inherit. Change a house rule in the plugin, not by copying a preset here.
 
