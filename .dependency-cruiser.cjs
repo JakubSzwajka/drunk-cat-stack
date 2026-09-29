@@ -1,3 +1,3 @@
-module.exports = require("eslint-plugin-codebase-ai-rules/dependency-cruiser").layout({
+module.exports = require("@jakubszwajka/house-rules/dependency-cruiser").layout({
   scope: "@hosti/",
 });

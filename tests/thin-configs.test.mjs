@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, it } from "node:test";
 
-const PLUGIN = "eslint-plugin-codebase-ai-rules";
+const PLUGIN = "@jakubszwajka/house-rules";
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const readJson = (path) => JSON.parse(read(path));
 const require = createRequire(import.meta.url);
@@ -33,6 +33,6 @@ describe("thin configs over the house plugin", () => {
   });
 
   it("the pins script runs the plugin's bin", () => {
-    assert.equal(readJson("package.json").scripts.pins, "codebase-ai-rules-pins");
+    assert.equal(readJson("package.json").scripts.pins, "house-rules-pins");
   });
 });

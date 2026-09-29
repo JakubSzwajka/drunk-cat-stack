@@ -87,7 +87,7 @@ pnpm test
 
 | Check | What it proves |
 | --- | --- |
-| `pnpm run pins` | Every `package.json` in the workspace pins exact versions, including `workspace:0.0.0`. The plugin's `codebase-ai-rules-pins` bin runs the check. |
+| `pnpm run pins` | Every `package.json` in the workspace pins exact versions, including `workspace:0.0.0`. The plugin's `house-rules-pins` bin runs the check. |
 | `pnpm run typecheck` | Effect diagnostics in every workspace package: no floating Effects, no global `Error` in the failure channel, no `Effect.run*` inside Effect code, no leaked requirements. |
 | `pnpm run deps` | Packages do not import apps, apps import packages only by name and only through `src/index.ts`, use-cases do not import delivery, server, or each other, app code sits in a layer, and no file is named `utils`, `helpers`, or `misc`. |
 | `pnpm run lint` | No comments that restate the code. |

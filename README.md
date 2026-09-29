@@ -1,163 +1,83 @@
 # drunk-cat-stack
 
-drunk-cat-stack is a TypeScript monorepo template whose `pnpm check` fails on structure rules instead of leaving them to review. It is a [pnpm](https://pnpm.io) workspace run by [Turborepo](https://turborepo.com), with apps under `apps/` and packages under `packages/`. It uses maintained tools as-is: Biome, ESLint, TypeScript 7 with the Effect language service ([`@effect/tsgo`](https://github.com/Effect-TS/tsgo)), Dependency Cruiser, Vitest, and [varlock](https://varlock.dev) for the environment. The house rules and the configs for those tools come from one plugin, [`eslint-plugin-codebase-ai-rules`](https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules). This repo keeps thin configs that point at its presets, the project values, and the files no tool can inherit. The example code is written in [Effect 4](https://effect.website). CI runs `pnpm install --frozen-lockfile`, `pnpm check`, and `pnpm test`, nothing else. A [fence](#fence) stops agents from skipping those checks at commit time.
+drunk-cat-stack is a TypeScript monorepo template. It shows [`@jakubszwajka/house-rules`](https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules) wired into a real [pnpm](https://pnpm.io) workspace run by [Turborepo](https://turborepo.com), with example code in [Effect 4](https://effect.website). It also holds the prose rules I want in every project, the ones no tool can check.
 
-It is a GitHub template. Create a repo from it with `gh repo create <name> --template JakubSzwajka/drunk-cat-stack`.
+Every lint rule, preset, and check in `pnpm check` comes from house-rules for deterministic feedback, and [its README lists them](https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules#rules-and-checks).
 
-It also carries the reference copy of the release workflow, one file that builds, tags, and deploys to Dokploy, and only runs by hand. See [`docs/release.md`](docs/release.md) to adopt it.
+It is a GitHub template. Create a repo from it with `gh repo create <name> --template JakubSzwajka/drunk-cat-stack`. It also carries the reference copy of the release workflow. See [`docs/release.md`](docs/release.md) to adopt it.
 
 ## Layout
 
 ```text
 .
-├── apps/
-│   └── api/                @hosti/api: delivery, server, use-cases
-│       ├── src/delivery/   http/tests/ holds the handler tests
-│       ├── src/use-cases/  tests/ holds the use-case tests
-│       ├── package.json    depends on "@hosti/bookings": "workspace:0.0.0"
-│       └── tsconfig.json   extends ../../tsconfig.base.json
-├── packages/
-│   └── bookings/           @hosti/bookings: one Effect module
-│       ├── src/index.ts    the only path in "exports"
-│       ├── src/internal/   private to the package
-│       ├── src/tests/      tests, through the public entry
-│       ├── package.json
-│       └── tsconfig.json   extends ../../tsconfig.base.json
+├── apps/api/               @hosti/api: delivery, server, use-cases
+├── packages/bookings/      @hosti/bookings: one Effect module, src/index.ts is its only export
 ├── tests/                  fence and thin-config wiring tests
-├── .dependency-cruiser.cjs layout() from the plugin, scope @hosti/
-├── biome.json              extends the plugin's Biome preset, plus excludes
+├── .dependency-cruiser.cjs layout({ scope: "@hosti/" }) from house-rules
+├── biome.json              extends the house-rules Biome preset, plus excludes
+├── eslint.config.mjs       the house-rules ESLint configs
+├── tsconfig.base.json      extends the house-rules Effect preset
 ├── pnpm-workspace.yaml     workspace folders and install policy
-├── turbo.json              typecheck and test order
-└── tsconfig.base.json      extends the plugin's Effect preset
+└── turbo.json              typecheck and test order
 ```
-
-`pnpm check` runs the root-level tools once: pins, varlock, Biome, ESLint, and Dependency Cruiser over the whole repo. It runs `typecheck` in each workspace package through Turborepo. `pnpm test` runs the fence tests once, then `test` in each workspace package through Turborepo.
 
 ```text
 pnpm check ─> pins ─> env:check ─> biome ─> lint ─> turbo run typecheck ─> deps
-                                                     ├─ @hosti/bookings typecheck
-                                                     └─ @hosti/api typecheck (after bookings)
-
 pnpm test  ─> node --test tests/ ─> turbo run test
-                                     ├─ @hosti/bookings typecheck ─> test
-                                     └─ @hosti/api typecheck ─> test
 ```
 
-Packages export TypeScript source, so there is no build step. Turborepo caching is off for `typecheck` and `test`: a gate always runs.
+Root tools run once over the whole repo. Turborepo runs `typecheck` and `test` in each workspace package, in dependency order. Packages export TypeScript source, so there is no build step. Caching is off, so a gate always runs. CI runs `pnpm install --frozen-lockfile`, `pnpm check`, and `pnpm test`, nothing else.
 
-## What is enforced
+## What the stack adds
 
-Most rules come from the house plugin, [`eslint-plugin-codebase-ai-rules`](https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules), pinned to a full commit SHA in `package.json`. It ships the ESLint rules, a TypeScript preset, a Biome preset, a Dependency Cruiser `layout()` factory, and the pins checker. This repo keeps a thin config for each tool that points at a preset and sets only project values, such as the `@hosti/` scope. Each preset's docs ship with the plugin, under `node_modules/eslint-plugin-codebase-ai-rules/docs/`.
+House-rules cannot ship these, because they live in files a package cannot hand down:
 
-In the Config file column, `…` stands for `eslint-plugin-codebase-ai-rules`. So `biome.json` → `…/biome` means `biome.json` extends the plugin's Biome preset, and the rule lives there.
-
-| Rule | Tool | Config file | Change when adapting |
-| --- | --- | --- | --- |
-| Every dependency in the root and in each workspace `package.json` is an exact version, a full commit SHA, or `workspace:<exact>`; `packageManager` is exact | `codebase-ai-rules-pins`, the plugin's bin | `package.json` (`pins` script), `apps/*/package.json`, `packages/*/package.json`, `pnpm-workspace.yaml` (`packages`, `saveExact`) | Nothing |
-| No dependency younger than one day, except listed exact versions | pnpm `minimumReleaseAge` | `pnpm-workspace.yaml` | `minimumReleaseAgeExclude` when you pin a version younger than a day, such as a new Effect RC |
-| No dependency runs an install script unless approved | pnpm `allowBuilds` (unlisted scripts fail the install) | `pnpm-workspace.yaml` | Nothing |
-| A dependency's engines must match | pnpm `engineStrict` | `pnpm-workspace.yaml` | Nothing |
-| Every declared environment variable resolves and matches its type | varlock `load` (`pnpm env:check`) | `.env.schema`, `.varlock/config.json` | The variables in `.env.schema` |
-| Formatting: spaces, indent 2, line width 100 | Biome formatter | `biome.json` → `…/biome` | A `formatter` block in `biome.json`, if your house style differs |
-| No `export *` | Biome `noReExportAll` | `biome.json` → `…/biome` | Nothing |
-| No non-null assertions (`x!`) | Biome `noNonNullAssertion` | `biome.json` → `…/biome` | Nothing |
-| Filename is kebab-case or matches an export | Biome `useFilenamingConvention` | `biome.json` → `…/biome` | Nothing |
-| Files over 300 lines (warn only) | Biome `noExcessiveLinesPerFile` | `biome.json` → `…/biome` | `maxLines`, set in `biome.json`, if you want another limit |
-| Comments are one line and sit inside a function or class body; tool directives excepted | ESLint `codebase-ai-rules/comment-discipline` | `eslint.config.mjs` | The `ignores` list; the plugin commit pin in `package.json` |
-| A relative Markdown link, image, or link reference definition targets a git-tracked path, exact case | ESLint `codebase-ai-rules/no-broken-relative-links` | `eslint.config.mjs` | `roots`, if a subtree is published as its own repository or site |
-| Strict types, plus `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `erasableSyntaxOnly`, in every workspace package | TypeScript 7, run by `turbo run typecheck` | `tsconfig.base.json` → `…/tsconfig/effect.json` → `…/tsconfig/strict.json`, each package's `tsconfig.json`, `turbo.json` | Nothing |
-| No floating Effects, in code or in Vitest callbacks | Effect diagnostics `floatingEffect`, `floatingEffectInVitest` | `tsconfig.base.json` → `…/tsconfig/effect.json` | Nothing |
-| Expected errors are typed: no global `Error`, `unknown`, or `any` in an Effect error channel; no try/catch in `Effect.gen` | Effect diagnostics `globalErrorInEffectFailure`, `globalErrorInEffectCatch`, `unknownInEffectCatch`, `anyUnknownInErrorContext`, `tryCatchInEffectGen` | `tsconfig.base.json` → `…/tsconfig/effect.json` | Nothing |
-| No `Effect.run*` inside Effect code, and no Effect returned from a generator | Effect diagnostics `runEffectInsideEffect`, `returnEffectInGen` | `tsconfig.base.json` → `…/tsconfig/effect.json` | Nothing |
-| Requirements and errors are handled, and services do not leak their dependencies | Effect diagnostics `missingEffectContext`, `missingEffectError`, `missingLayerContext`, `leakingRequirements`, `unsafeEffectTypeAssertion` | `tsconfig.base.json` → `…/tsconfig/effect.json` | Nothing |
-| No `async`, `new Promise`, global `console`, `Date`, `fetch`, `Math.random`, timers, `crypto.randomUUID`, or Node built-ins that Effect replaces | Effect diagnostics `asyncFunction`, `newPromise`, `global*`, `cryptoRandomUUID*`, `nodeBuiltinImport` | `tsconfig.base.json` → `…/tsconfig/effect.json` | Nothing |
-| No sync Schema calls inside Effect code, no `instanceof` on a Schema | Effect diagnostics `schemaSyncInEffect`, `instanceOfSchema` | `tsconfig.base.json` → `…/tsconfig/effect.json` | Nothing |
-| No import cycles | Dependency Cruiser `no-cycles` | `.dependency-cruiser.cjs` → `…/dependency-cruiser` `layout()` | Nothing |
-| A package never imports an app | Dependency Cruiser `packages-do-not-import-apps` | `.dependency-cruiser.cjs` → `layout()` | `appsDir`, `packagesDir` |
-| An app never imports another app | Dependency Cruiser `apps-do-not-import-other-apps` | `.dependency-cruiser.cjs` → `layout()` | `appsDir` |
-| Another package is imported by its name, never by a relative path | Dependency Cruiser `packages-imported-by-name` | `.dependency-cruiser.cjs` → `layout()` | `appsDir`, `packagesDir` |
-| Callers reach another package only through its `src/index.ts` | Dependency Cruiser `packages-public-entry-only`, plus `exports` in each package's `package.json` | `.dependency-cruiser.cjs` → `layout()`, `packages/*/package.json` | `publicEntry` |
-| Every file under an app's `src/` sits in `delivery/`, `server/`, or `use-cases/`; only `src/main.ts` and `src/index.ts` may sit directly in `src/` | Dependency Cruiser `app-code-in-layers` | `.dependency-cruiser.cjs` → `layout()` | `layers`, `appEntryFiles` |
-| Delivery and server never import each other | Dependency Cruiser `delivery-does-not-import-server`, `server-does-not-import-delivery` | `.dependency-cruiser.cjs` → `layout()` | `layers.delivery`, `layers.server` |
-| Use-cases never import delivery or server | Dependency Cruiser `use-cases-do-not-import-outer-layers` | `.dependency-cruiser.cjs` → `layout()` | `layers.useCases` |
-| A use-case never imports another use-case; each top-level file or folder under `use-cases/` is one use-case | Dependency Cruiser `use-cases-do-not-import-use-cases` | `.dependency-cruiser.cjs` → `layout()` | `layers.useCases` |
-| No file or folder named `utils`, `helpers`, or `misc` under `apps/` or `packages/`; `string-utils.ts` passes | Dependency Cruiser `no-ownerless-files` | `.dependency-cruiser.cjs` → `layout()` | `ownerlessNames` |
-| No deep package imports such as `@hosti/bookings/internal/x` | Dependency Cruiser `no-unresolved-deep-package-imports` | `.dependency-cruiser.cjs` → `layout()` | `scope` |
-| No unresolved imports, including a workspace package the importer does not declare | Dependency Cruiser `no-unresolved-imports` | `.dependency-cruiser.cjs` → `layout()` | Nothing |
-| Production code never imports test files | Dependency Cruiser `production-does-not-import-tests` | `.dependency-cruiser.cjs` → `layout()` | `testsDir` |
-| A test file (`*.test.*`, `*.spec.*`) under `apps/` or `packages/` sits directly in a `tests/` folder inside `src/`, next to the code it tests | Dependency Cruiser `tests-live-in-tests-dir` | `.dependency-cruiser.cjs` → `layout()` | `testsDir` |
-| Tests never import a package's `src/internal/`, not even the package's own tests | Dependency Cruiser `tests-do-not-import-internals` | `.dependency-cruiser.cjs` → `layout()` | `internalDir` |
-| Each thin config still points at its plugin preset: `tsconfig.base.json` extends it and does not replace its `plugins` block, `biome.json` extends it, and `.dependency-cruiser.cjs` keeps every `layout()` rule unchanged | Node test runner, `tests/thin-configs.test.mjs` (`pnpm test`) | `tests/thin-configs.test.mjs` | Nothing |
-| The fence behaves as documented | Node test runner over `tests/**/*.test.mjs` (`pnpm test`) | `package.json` | Nothing |
-| Example code behaves as documented, with Effects run only by `it.effect` and `it.layer` | Vitest with `@effect/vitest` in each workspace package, run by `turbo run test` (`pnpm test`) | each package's `vitest.config.ts` (`test.include` runs only `src/**/tests/*.test.ts`), `turbo.json` | `test.include` |
-
-Biome, ESLint, and Dependency Cruiser all skip `node_modules`, `dist`, `coverage`, `generated`, and `.agent_sources`. Dependency Cruiser also skips `.turbo`. Biome does not merge `files.includes` from a preset, so `biome.json` keeps its own list.
-
-`tests-live-in-tests-dir`, `app-code-in-layers`, and `no-ownerless-files` are module rules, not dependency rules. Dependency Cruiser skips `node_modules`, so a test that imports only `@effect/vitest` has no dependency left to match. Each module rule sets `numberOfDependentsLessThan: 100`, which every file meets, so it checks each file on its own, whatever it imports. Module rules see only the JS and TS files Dependency Cruiser parses: a `utils/` folder that holds only JSON goes unreported.
+- **The fence.** lefthook runs `pnpm check` and then `pnpm test` before each commit. The agent harnesses block `git ... --no-verify` and friends. See [Fence](#fence).
+- **Install policy** in `pnpm-workspace.yaml`. `saveExact` and `saveWorkspaceProtocol` make `pnpm add` write exact pins. `engineStrict` enforces engines. `minimumReleaseAge: 1440` refuses a version younger than a day. `allowBuilds` sets every install script to `false`. `packageExtensions` gives the ESLint plugin TypeScript 6.0.3.
+- **Environment.** varlock checks `.env.schema` inside `pnpm check`. Its telemetry is off.
+- **Turborepo telemetry off.** Every script that calls `turbo` sets `TURBO_TELEMETRY_DISABLED=1`, and so does CI.
+- **Wiring tests** in `tests/`. They prove each thin config still extends its preset, and that the fence behaves.
 
 ## TypeScript 7 and Effect
 
-TypeScript is pinned to 7.0.2 in the root and in every workspace package. The Effect diagnostics come from `@effect/tsgo`, which targets that version. `pnpm install` runs the root `prepare` script, and `prepare` runs `effect-tsgo patch` before `lefthook install`. The patch moves the installed `tsc` binary aside and copies the Effect build in its place, so `pnpm run typecheck` fails on the Effect diagnostics set to `error` in the plugin's `tsconfig/effect.json` preset, which `tsconfig.base.json` extends. All workspace packages link to the same TypeScript 7.0.2 install under `node_modules/.pnpm`, so one patch covers them all. If `tsc` stops reporting Effect errors, run `pnpm exec effect-tsgo patch` again.
+TypeScript is pinned to 7.0.2 everywhere. The root `prepare` script runs `effect-tsgo patch`, which swaps the installed `tsc` for the Effect build. If `tsc` stops reporting Effect errors, run `pnpm exec effect-tsgo patch` again.
 
 Two tools do not speak TypeScript 7 yet:
 
-- **Dependency Cruiser 18.4.0** supports TypeScript below 7. It parses with SWC instead: `layout()` sets `parser: "swc"`, and this repo pins an exact `@swc/core`. It resolves `@hosti/bookings` through pnpm's `node_modules` symlink and the package's `exports`, so no path alias is needed. Each run prints a `missing-typescript-transpiler` warning. The warning is expected: it means the `tsc` parser is unavailable, and SWC reads the TypeScript sources in its place.
-- **`@typescript-eslint/parser` 8.70.1**, which the comment plugin uses, peers on TypeScript below 6.1 and loads the TypeScript compiler API at runtime. The plugin does not depend on TypeScript itself, so a `plugin>typescript` override has nothing to rewrite. Instead `packageExtensions` in `pnpm-workspace.yaml` adds `typescript: 6.0.3` to the plugin's dependencies, and pnpm resolves the parser's peer from there. The root and every workspace package keep 7.0.2. `pnpm peers check` reports no issues. ESLint still checks comments in `.js`, `.mjs`, `.cjs`, `.ts`, and `.tsx` files. Drop the extension when the parser accepts TypeScript 7.
+- Dependency Cruiser parses with SWC, so this repo pins `@swc/core`. Each run prints a `missing-typescript-transpiler` warning. That warning is expected.
+- `@typescript-eslint/parser` needs TypeScript below 6.1. `packageExtensions` gives it 6.0.3. Drop that entry when the parser accepts 7.
 
-Effect 4 is a release candidate. `effect` and `@effect/vitest` share one exact version in every workspace package, and they move together. Vitest is pinned to 5.0.1, the major `@effect/vitest` accepts. A new Effect RC is often less than a day old, so it is the usual case for `minimumReleaseAgeExclude`, and a bump replaces its entries there.
+Effect 4 is a release candidate. `effect` and `@effect/vitest` share one exact version and move together. A new RC is often less than a day old, so it usually needs a `minimumReleaseAgeExclude` entry. `pnpm vendor:agent-sources` clones the matching Effect source into `.agent_sources/` for agents to read.
 
-`pnpm vendor:agent-sources` shallow-clones the Effect repository at the tag that matches the pinned `effect` version into `.agent_sources/`, which git ignores. It fails if the workspace packages pin different `effect` versions. Agents read it for API shape. It is not part of `pnpm check`.
-
-## pnpm and Turborepo
-
-pnpm is pinned by `packageManager` in `package.json` (`pnpm@12.5.1`). Corepack reads that field, so run `corepack enable` once and `pnpm` resolves to the pinned version. pnpm 12 reads project settings from `pnpm-workspace.yaml`, not `.npmrc`:
-
-- `engineStrict` and `saveExact`, which were in `.npmrc`, plus `saveWorkspaceProtocol: true`, so `pnpm add <workspace package>` writes `workspace:<exact version>`;
-- `minimumReleaseAge: 1440`, a supply-chain guard. Setting it explicitly makes the check strict, so any exact pin younger than a day fails the install. Either wait a day, or add a `minimumReleaseAgeExclude` entry for that exact version, with owner approval, and replace the entry when you bump. Today it lists the Effect RC pins;
-- `allowBuilds`, where `@swc/core` and `lefthook` are set to `false`. `@swc/core` ships its native binary as an optional dependency; its script only adds a wasm fallback. lefthook's script runs `lefthook install`, which `prepare` already runs. pnpm fails an install that meets an install script not listed here;
-- `packageExtensions`, for the ESLint plugin's TypeScript 6.
-
-The install uses pnpm's default isolated `node_modules`. No hoisting setting is used.
-
-Turborepo (`turbo@2.11.2`) runs `typecheck` and `test` in each workspace package. `typecheck` waits for the `typecheck` of the packages it depends on, and `test` waits for the same package's `typecheck`. Caching is off for both. Turborepo collects anonymous telemetry by default. The root scripts that call `turbo` set `TURBO_TELEMETRY_DISABLED=1`, and CI sets it for the whole job. Turborepo has no project config for this. If you run `turbo` by hand, run `pnpm exec turbo telemetry disable` once per machine.
-
-`turbo@2.11.3` was the latest release when this was set up, but it was less than a day old, and its six platform binaries failed the release-age check. `2.11.2` is pinned instead.
+Turborepo is pinned to 2.11.2, because 2.11.3 was under a day old when this was set up.
 
 ## Environment
 
-`.env.schema` declares every environment variable the code reads. It holds no secret values. Local values, secrets included, go in `.env.local`, which git ignores. `pnpm env:check` runs `varlock load`, which checks each variable against its type and fails when a required one is empty. It runs inside `pnpm check`, right after the pin check. Varlock prints the resolved values and hides the ones marked `@sensitive`.
-
-Run a command with the values injected:
+`.env.schema` declares every variable the code reads, with no secret values. Local values go in `.env.local`, which git ignores. `pnpm env:check` runs `varlock load`. Run a command with the values injected:
 
 ```sh
 pnpm exec varlock run -- <cmd>
 ```
 
-Every variable starts as optional and sensitive (`@defaultRequired=false`, `@defaultSensitive=true`). CI has no `.env.local`, so a required variable needs a default in the schema or a value set in CI.
+Every variable starts optional and sensitive. CI has no `.env.local`, so a required variable needs a default or a CI value. To confirm telemetry is off, run `DEBUG=varlock:telemetry pnpm exec varlock load`.
 
-Varlock sends anonymous usage data by default. `.varlock/config.json` turns that off for this repo. To confirm, run `DEBUG=varlock:telemetry pnpm exec varlock load` and look for `telemetry opted out - config file (project config)`.
+## Prose rules
 
-Type generation (`varlock codegen`) is off. Nothing here reads the environment yet, and a generated file would have to exist before `tsc` runs.
+These are what a reviewer checks. A green `pnpm check` says nothing about them.
 
-## Review only
-
-No tool here can check these without guessing:
-
-- whether a one-line comment gives a real reason or just restates the code (ESLint checks the comment's place and shape, not its meaning);
-- error design beyond the typing rules, and whether delivery maps errors in one place;
-- whether a test calls `Effect.run*` outside Effect code instead of using `it.effect` (the diagnostics catch it only inside Effect code);
-- whether all Effect packages share one version across the workspace (pins only checks that each is exact; `pnpm vendor:agent-sources` fails on a split `effect` pin, but it is not part of `check`);
-- whether a cast has an allowed intent;
-- folder naming beyond the three app layers and the `utils`/`helpers`/`misc` ban, sibling counts, grouping inside a layer or package, module depth, and seam placement, including whether a new capability should be its own package;
-- whether a module's own tests use only its interface (the check bans only `src/internal/`; a test can still import another file beside `src/index.ts`, such as `src/types.ts`);
-- whether a frontend library solves a named pain;
-- React semantics beyond the filename matching an export;
-- compiler option changes in a workspace package's `tsconfig.json`, or in `tsconfig.base.json` beyond its `plugins` block, because TypeScript accepts `strict: true` next to `strictNullChecks: false`;
-- a rule a thin config switches off or weakens on top of its preset, such as a Biome rule set to `off` in `biome.json` (the wiring test checks only that each preset is still extended, and that no `layout()` rule changed).
+- A one-line comment gives a real reason. It does not restate the code.
+- Errors are designed, not just typed. Delivery maps them in one place.
+- Tests use `it.effect` or `it.layer`, never `Effect.run*`, even outside Effect code.
+- Every Effect package shares one version across the workspace.
+- A cast has a stated intent.
+- Folders are named after what they own. Seams sit where callers need them. A new capability that stands alone gets its own package.
+- A module's own tests use only its public entry, not a file beside it.
+- A frontend library solves a named pain.
+- React code follows React semantics, not only the filename rule.
+- Nobody loosens a compiler option in a `tsconfig.json`. TypeScript accepts `strict: true` next to `strictNullChecks: false`.
+- Nobody switches off or weakens a preset rule in a thin config. The wiring test only checks that each preset is still extended.
 
 ## Fence
-
-lefthook runs `pnpm check` and then `pnpm test` before each commit. `git commit --no-verify` would skip that, so the agent harnesses block it before the shell runs it.
 
 ```text
 git commit ──> lefthook pre-commit ──> pnpm check ──> pnpm test
@@ -171,46 +91,43 @@ agent bash call
                                                             git or jj ─> allow
 ```
 
-The policy blocks a `git` command that contains `--no-verify` or `core.hooksPath`, a `git commit` with `-n`, and any command that sets `LEFTHOOK=0`. It matches `--no-verify` anywhere in a `git` command, so `git commit -m "skip --no-verify"` is blocked too. The shell strips the quotes from `"--no-verify"` and passes a real flag, and telling a flag from message text is not worth the risk. Reword the message. `echo --no-verify` and `git merge --no-verify-signatures` pass. `tests/` holds the full case list.
+The policy blocks a `git` command that contains `--no-verify` or `core.hooksPath`, a `git commit` with `-n`, and any command that sets `LEFTHOOK=0`. It matches `--no-verify` anywhere, even inside a commit message, so reword the message. `tests/` holds the full case list.
 
-In Pi, the extension also prefixes every allowed `git` or `jj` call with no-op editors (`GIT_EDITOR=:` and the like), so a rebase or merge never waits on an editor nobody sees. The Claude Code hook only denies. A PreToolUse hook that rewrites a command must also answer allow, which skips the permission prompt, or ask, which prompts on every `git` call.
+In Pi, the extension also sets no-op editors on every allowed `git` or `jj` call, so a rebase never waits on an editor nobody sees. Claude Code reads hooks only from `.claude/settings.json`. To turn its block on, copy or link `.agents/settings.json` there.
 
-Pi is the harness this repo uses. Claude Code reads hooks only from `.claude/settings.json`, so it does not load `.agents/settings.json`. To turn the Claude Code block on, copy or link that file to `.claude/settings.json`.
+This raises the floor. An agent can still write the command into a script and run that.
 
-This raises the floor. It does not stop an agent that writes the command into a script file and runs that.
-
-`pnpm acceptance` clones the committed HEAD into a temp dir and runs `pnpm install --frozen-lockfile`, `pnpm check`, and `pnpm test` there. It fails if the install did not put the lefthook pre-commit hook in place. It proves a cold clone works. It does not see uncommitted changes.
+`pnpm acceptance` clones the committed HEAD into a temp dir and runs install, check, and test there. It proves a cold clone works. It does not see uncommitted changes.
 
 The fence is adapted from [rat-stack](https://github.com/joelhooks/rat-stack) by Joel Hooks, MIT. See `NOTICE`.
 
 ## Adapt it
 
-Start from the template, or copy the files into an existing pnpm workspace.
+Start from the template, or copy these into an existing pnpm workspace:
 
-1. Copy the thin configs: `biome.json`, `eslint.config.mjs`, `tsconfig.base.json`, and `.dependency-cruiser.cjs`. Each one points at a plugin preset. Then copy the files no tool can inherit: `turbo.json`, `pnpm-workspace.yaml`, and `.github/workflows/ci.yml`.
-2. Copy the `scripts`, `devDependencies`, `engines`, and `packageManager` fields from the root `package.json`. The `pins` script runs the plugin's `codebase-ai-rules-pins` bin. Keep the plugin pinned to a full commit SHA. To upgrade, change the SHA and run `pnpm install`; the presets, rules, and pins checker all move with it. Keep every Effect package on the same version in every workspace package.
-3. Copy `.env.schema` and `.varlock/config.json`, and the `.env` lines from `.gitignore`. Replace `APP_ENV` in `.env.schema` with the variables your code reads.
-4. Copy the fence: `.nvmrc`, `lefthook.yml`, `scripts/`, `tests/`, `.agents/settings.json`, `.pi/extensions/git-interceptor.ts`, and `NOTICE`. Copy `skills/` and the `.agent_sources` line from `.gitignore` if your agents should use them.
-5. Copy `AGENTS.md`, then rewrite the workspace and layer rules in `AGENTS.md` for your project. Write your own `VISION.md`.
-6. Rename the scope. Replace `@hosti/` in every `package.json` `name` and dependency, in the imports, in the `Context.Service` keys, and in the `scope` option passed to `layout()` in `.dependency-cruiser.cjs`. Then run `pnpm install` so the lockfile follows.
-7. Check the `layout()` options in `.dependency-cruiser.cjs`. The defaults match `apps/<name>/src/{delivery,server,use-cases}`, `apps/<name>/src/main.ts`, and `packages/<name>/src/index.ts`. If your folders differ, pass `appsDir`, `packagesDir`, `layers`, `publicEntry`, `internalDir`, `appEntryFiles`, `ownerlessNames`, or `testsDir`. The values are folder names and paths, not regular expressions. To add a project rule, push it onto `forbidden` of the object `layout()` returns. The plugin's `docs/dependency-cruiser.md` lists every option.
-8. Run `pnpm install`, which patches `tsc` and installs the pre-commit hook. Then run `pnpm check` and `pnpm test`.
+1. [ ] The thin configs: `biome.json`, `eslint.config.mjs`, `tsconfig.base.json`, `.dependency-cruiser.cjs`.
+2. [ ] The stack files: `turbo.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`, `.env.schema`, `.varlock/config.json`, and the `.env` lines from `.gitignore`.
+3. [ ] The root `package.json` `scripts`, `devDependencies`, `engines`, and `packageManager`. Keep house-rules pinned to a full commit SHA. To upgrade, change the SHA and run `pnpm install`.
+4. [ ] The fence: `.nvmrc`, `lefthook.yml`, `scripts/`, `tests/`, `.agents/settings.json`, `.pi/extensions/git-interceptor.ts`, `NOTICE`. Add `skills/` if your agents should use them.
+5. [ ] `AGENTS.md`, rewritten for your project. Write your own `VISION.md`.
+6. [ ] Rename `@hosti/` everywhere: package names, dependencies, imports, `Context.Service` keys, and the `scope` passed to `layout()`.
+7. [ ] If your folders differ, pass `layout()` options such as `appsDir`, `packagesDir`, `layers`, `publicEntry`, `internalDir`, `appEntryFiles`, `ownerlessNames`, or `testsDir`. The house-rules docs explain each one.
+8. [ ] Run `pnpm install`, then `pnpm check` and `pnpm test`.
 
 ### Add an app
 
-1. Create `apps/<name>/` with a `package.json` copied from `apps/api`: a new `name`, the same exact pins, and the `typecheck` and `test` scripts.
-2. Copy `tsconfig.json` and `vitest.config.ts` from `apps/api`.
-3. Put code under `src/delivery/`, `src/server/`, and `src/use-cases/`. Only `src/main.ts` and `src/index.ts` may sit directly in `src/`. The layer rules already match every app.
-4. Add each package the app imports with `pnpm --filter <app name> add <package name>`. pnpm writes `workspace:<exact version>` because of `saveWorkspaceProtocol` and `saveExact`.
-5. Run `pnpm install`, `pnpm check`, and `pnpm test`.
+1. Create `apps/<name>/` from `apps/api`: `package.json` with a new `name`, `tsconfig.json`, and `vitest.config.ts`.
+2. Put code under `src/delivery/`, `src/server/`, and `src/use-cases/`. Only `src/main.ts` and `src/index.ts` sit directly in `src/`.
+3. Add each package with `pnpm --filter <app name> add <package name>`.
+4. Run `pnpm install`, `pnpm check`, and `pnpm test`.
 
 ### Add a package
 
-Follow [`skills/add-an-effect-module/SKILL.md`](skills/add-an-effect-module/SKILL.md). In short: create `packages/<name>/` from `packages/bookings`, keep `exports` to `"." : "./src/index.ts"`, keep private code under `src/internal/`, and run `pnpm install`. The dependency-cruiser rules already match every package.
+Follow [`skills/add-an-effect-module/SKILL.md`](skills/add-an-effect-module/SKILL.md). In short: copy `packages/bookings`, keep `exports` to `"." : "./src/index.ts"`, keep private code in `src/internal/`, and run `pnpm install`.
 
 ## Example
 
-[`examples/hosti-before`](examples/hosti-before/README.md) holds code that fails each check, as Markdown snippets so this repo stays green.
+[`examples/hosti-before`](examples/hosti-before/README.md) holds code that fails the checks, as Markdown snippets so this repo stays green.
 
 [`packages/bookings`](packages/bookings) and [`apps/api`](apps/api) are real code that passes. Dependencies point inward:
 
@@ -220,7 +137,7 @@ apps/api
       └──────────────────────> @hosti/bookings  (types only)
 ```
 
-The bookings package exposes a `Bookings` service and a typed `BookingNotFound` error through `src/index.ts`, the only path in its `exports`. The `showBooking` use-case in `apps/api` yields that service. The HTTP handler maps `BookingNotFound` to a 404 once, so its error channel is `never`. `apps/api` has no server code yet, so the diagram shows none. The server layer rules still apply to `src/server/` once you add it. Tests sit in a `tests/` folder inside the folder they test, such as `src/use-cases/tests/`, and run under `it.effect`.
+The package exposes a `Bookings` service and a typed `BookingNotFound` error. The `showBooking` use-case yields the service. The HTTP handler maps `BookingNotFound` to a 404 once, so its error channel is `never`. Tests sit in a `tests/` folder beside the code they test and run under `it.effect`.
 
 ## Commands
 

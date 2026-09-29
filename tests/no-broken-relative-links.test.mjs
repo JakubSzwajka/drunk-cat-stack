@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 
 import { ESLint } from "eslint";
-import codebaseAiMarkdown from "eslint-plugin-codebase-ai-rules/markdown";
+import houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";
 
 const lintMarkdown = async (source) => {
   const dir = mkdtempSync(join(tmpdir(), "no-broken-relative-links-"));
@@ -18,7 +18,7 @@ const lintMarkdown = async (source) => {
     const eslint = new ESLint({
       cwd: dir,
       overrideConfigFile: true,
-      overrideConfig: codebaseAiMarkdown,
+      overrideConfig: houseRulesMarkdown,
     });
     const [result] = await eslint.lintFiles(["source.md"]);
     return result.messages;
@@ -27,11 +27,11 @@ const lintMarkdown = async (source) => {
   }
 };
 
-describe("codebase-ai-rules/no-broken-relative-links via the markdown preset", () => {
+describe("house-rules/no-broken-relative-links via the markdown preset", () => {
   it("reports a relative link to an untracked path", async () => {
     const messages = await lintMarkdown("[broken](./missing.md)\n");
     assert.equal(messages.length, 1);
-    assert.equal(messages[0].ruleId, "codebase-ai-rules/no-broken-relative-links");
+    assert.equal(messages[0].ruleId, "house-rules/no-broken-relative-links");
     assert.match(messages[0].message, /Broken relative link "\.\/missing\.md"/);
   });
 

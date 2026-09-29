@@ -2,7 +2,7 @@
 
 This file is the law for agents and people working in this repo, and in any project made from the drunk-cat-stack template. Read `VISION.md` for why. It does not override this file. Read `CONTEXT.md` for the words this repo uses.
 
-The house rules and the tool configs come from the pinned plugin `eslint-plugin-codebase-ai-rules`. This repo keeps thin configs that extend its presets, the project values such as the `@hosti/` scope, and the files no tool can inherit. Change a house rule in the plugin, not by copying a preset here.
+The house rules and the tool configs come from the pinned plugin `@jakubszwajka/house-rules`. This repo keeps thin configs that extend its presets, the project values such as the `@hosti/` scope, and the files no tool can inherit. Change a house rule in the plugin, not by copying a preset here.
 
 ## Commands
 
@@ -11,7 +11,7 @@ This repo is a pnpm workspace run by Turborepo. Use pnpm, at the version `packag
 | Command | What it does |
 | --- | --- |
 | `pnpm install --frozen-lockfile` | Install from `pnpm-lock.yaml`. The root `prepare` script then patches `tsc` with the Effect language service (`effect-tsgo patch`) and installs the lefthook pre-commit hook. |
-| `pnpm check` | Exact pins in every workspace `package.json` (the plugin's `codebase-ai-rules-pins` bin), environment schema, Biome, ESLint, Dependency Cruiser once at the root, and `typecheck` in each workspace package through Turborepo. |
+| `pnpm check` | Exact pins in every workspace `package.json` (the plugin's `house-rules-pins` bin), environment schema, Biome, ESLint, Dependency Cruiser once at the root, and `typecheck` in each workspace package through Turborepo. |
 | `pnpm env:check` | `varlock load`: resolve and validate every variable in `.env.schema`. |
 | `pnpm exec varlock run -- <cmd>` | Run a command with the environment values injected. |
 | `pnpm test` | Node test runner over `tests/**/*.test.mjs`, then `test` (Vitest) in each workspace package through Turborepo. |
@@ -25,7 +25,7 @@ Run `pnpm fix` or `pnpm format` only when you mean to rewrite files. Before you 
 
 ## What check enforces
 
-The table under "What is enforced" in `README.md` lists every rule, its tool, and its config file. That table is the source. Do not copy it here.
+The rules table in the house-rules README lists every checked rule, its tool, and its docs. That table is the source. Do not copy it here or into `README.md`. The "What the stack adds" section in `README.md` lists only what this repo adds on top: the fence, the install policy, the environment check, and Turborepo telemetry.
 
 ## Workspace, apps, and packages
 
@@ -55,9 +55,9 @@ Before you edit Effect code, read `effect/AGENTS.md` and the docs under `effect/
 - Pin all Effect packages together. `effect`, `@effect/vitest`, and any other `@effect/*` runtime package share one exact version, and a bump moves all of them in the same change. `@effect/tsgo` versions separately and must support the pinned TypeScript.
 - Never set an Effect diagnostic below `error` to make a change pass, and never override the plugin's Effect preset in `tsconfig.base.json` or a package's `tsconfig.json`. A `plugins` entry there replaces the whole Effect block. Fix the code.
 
-## Review only
+## Prose rules
 
-The "Review only" section in `README.md` lists what no tool here checks. A green `pnpm check` says nothing about those. Point them out in review instead of claiming a check covers them.
+The "Prose rules" section in `README.md` lists what no tool here checks. A green `pnpm check` says nothing about those. Point them out in review instead of claiming a check covers them.
 
 ## Environment
 
@@ -68,7 +68,7 @@ The "Review only" section in `README.md` lists what no tool here checks. A green
 
 ## Pins
 
-Every dependency in the root `package.json` and in each workspace `package.json` is an exact version. A GitHub dependency is pinned to a full 40-character commit SHA. A workspace dependency is `workspace:` plus the exact version, such as `workspace:0.0.0`. `packageManager` names an exact pnpm version. `pnpm-workspace.yaml` sets `saveExact: true` and `saveWorkspaceProtocol: true`, so `pnpm add <pkg>` writes an exact pin, and `pnpm add <workspace package>` writes `workspace:<exact version>`. `pnpm check` runs the plugin's `codebase-ai-rules-pins` bin, which fails on `^`, `~`, ranges, tags, branch names, and `workspace:*`. Node is pinned in `.nvmrc`, and CI reads it from there.
+Every dependency in the root `package.json` and in each workspace `package.json` is an exact version. A GitHub dependency is pinned to a full 40-character commit SHA. A workspace dependency is `workspace:` plus the exact version, such as `workspace:0.0.0`. `packageManager` names an exact pnpm version. `pnpm-workspace.yaml` sets `saveExact: true` and `saveWorkspaceProtocol: true`, so `pnpm add <pkg>` writes an exact pin, and `pnpm add <workspace package>` writes `workspace:<exact version>`. `pnpm check` runs the plugin's `house-rules-pins` bin, which fails on `^`, `~`, ranges, tags, branch names, and `workspace:*`. Node is pinned in `.nvmrc`, and CI reads it from there.
 
 `pnpm-workspace.yaml` also holds the install policy:
 

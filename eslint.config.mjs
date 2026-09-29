@@ -1,8 +1,8 @@
-import codebaseAiRules from "eslint-plugin-codebase-ai-rules";
-import codebaseAiMarkdown from "eslint-plugin-codebase-ai-rules/markdown";
+import houseRules from "@jakubszwajka/house-rules";
+import houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";
 
 export default [
   { ignores: ["**/node_modules/", "**/dist/", "**/coverage/", "**/generated/", ".agent_sources/"] },
-  ...codebaseAiRules.configs.recommended,
-  ...codebaseAiMarkdown,
+  ...houseRules.configs.recommended,
+  ...houseRulesMarkdown,
 ];
