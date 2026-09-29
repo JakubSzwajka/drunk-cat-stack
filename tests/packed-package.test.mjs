@@ -33,6 +33,10 @@ async function writeFixtureFiles(fixtureDirectory) {
     'import codebaseAiRules from "eslint-plugin-codebase-ai-rules";\nimport design from "eslint-plugin-codebase-ai-rules/design";\nimport codebaseAiMarkdown from "eslint-plugin-codebase-ai-rules/markdown";\n\nexport default [\n  ...codebaseAiRules.configs.recommended,\n  ...codebaseAiMarkdown,\n  ...design({\n    tokenFiles: ["styles/tokens.css"],\n    source: { files: ["**/*.tsx"] },\n    rules: { "design-scale-value": [{ property: "radius$", allowed: ["4px"] }] },\n  }),\n];\n',
   );
   await writeFile(
+    path.join(fixtureDirectory, ".dependency-cruiser.cjs"),
+    'module.exports = require("eslint-plugin-codebase-ai-rules/dependency-cruiser").layout({ scope: "@acme/" });\n',
+  );
+  await writeFile(
     path.join(fixtureDirectory, "pass.js"),
     "function run() {\n  // The retry must stay bounded by the caller's deadline.\n  return true;\n}\n",
   );
@@ -59,15 +63,23 @@ async function writeFixtureFiles(fixtureDirectory) {
   await writeFile(
     path.join(fixtureDirectory, "verify-install.mjs"),
     `import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import { ESLint } from "eslint";
 import codebaseAiRules from "eslint-plugin-codebase-ai-rules";
+import { layout } from "eslint-plugin-codebase-ai-rules/dependency-cruiser";
 
 assert.equal(codebaseAiRules.meta.name, "eslint-plugin-codebase-ai-rules");
 assert.equal(codebaseAiRules.configs.recommended[0].rules["codebase-ai-rules/comment-discipline"], "error");
 assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules"), /node_modules/);
 assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/markdown"), /node_modules/);
 assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/design"), /node_modules/);
+assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/dependency-cruiser"), /node_modules/);
 assert.equal(codebaseAiRules.meta.version, ${JSON.stringify(packageVersion)});
+
+const dependencyCruiserConfig = createRequire(import.meta.url)("./.dependency-cruiser.cjs");
+assert.deepEqual(dependencyCruiserConfig, layout({ scope: "@acme/" }));
+assert.equal(dependencyCruiserConfig.forbidden.length, 13);
+assert.equal(dependencyCruiserConfig.options.parser, "swc");
 
 const eslint = new ESLint({ cwd: process.cwd(), overrideConfigFile: "eslint.config.mjs" });
 const passing = await eslint.lintFiles(["pass.js", "pass.ts"]);
@@ -134,7 +146,7 @@ assert.deepEqual(
   );
 }
 
-test("packs and installs the exact package before linting fresh JS, TS, Markdown, and design fixtures", async () => {
+test("packs and installs the exact package before linting fresh JS, TS, Markdown, and design fixtures and loading the dependency-cruiser preset", async () => {
   const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), "codebase-ai-rules-pack-"));
   const packageDirectory = path.join(temporaryDirectory, "package");
   const fixtureDirectory = path.join(temporaryDirectory, "fixture");

@@ -1,6 +1,6 @@
 # eslint-plugin-codebase-ai-rules
 
-This repository contains a private GitHub package with six ESLint rules. It extracts Hosti's comment-discipline rule without changing the rule's semantics, adds a Markdown rule that reports relative links to paths git does not track, and adds four design-token rules for CSS and JS/TS.
+This repository contains a private GitHub package with six ESLint rules and one Dependency Cruiser preset. It extracts Hosti's comment-discipline rule without changing the rule's semantics, adds a Markdown rule that reports relative links to paths git does not track, adds four design-token rules for CSS and JS/TS, and ships drunk-cat-stack's monorepo layout rules as a reusable Dependency Cruiser config.
 
 ## Vocabulary
 
@@ -9,6 +9,7 @@ This repository contains a private GitHub package with six ESLint rules. It extr
   - `recommended`, exported as `plugin.configs.recommended` from the package root. It runs `comment-discipline` on JS, JSX, MJS, CJS, TS, TSX, MTS, and CTS.
   - `markdown`, the default export of the `eslint-plugin-codebase-ai-rules/markdown` subpath. It runs `no-broken-relative-links` on `**/*.md` through the `@eslint/markdown` GFM language.
   - `design`, the preset returned by the `design(options)` factory, the default and named export of the `eslint-plugin-codebase-ai-rules/design` subpath. It returns a CSS block on the `@eslint/css` `css/css` language running the three CSS design rules, and a source block running `design-no-raw-color-literal` with the same parser setup as `recommended`.
+- **Layout preset**: the Dependency Cruiser config returned by the `layout(options)` factory, the named export of the `eslint-plugin-codebase-ai-rules/dependency-cruiser` subpath. It is not an ESLint preset and not one of the three presets above. It returns a whole Dependency Cruiser config, `forbidden` plus `options`, holding 13 **layout rules**. Layout rules are Dependency Cruiser rules, not ESLint rules, and are not counted among the six.
 - **Consumer**: a repository that installs this package from GitHub and spreads one or more presets in `eslint.config.mjs`.
 - **Exception**: one closed, syntax-owned directive or legal header accepted by `comment-discipline`.
 - **Relative link**: a Markdown link, image, or link reference definition whose target has no URI scheme, is not a pure anchor, is not protocol-relative, and contains no `{` placeholder.
@@ -21,13 +22,15 @@ This repository contains a private GitHub package with six ESLint rules. It extr
 ## Contract
 
 - Package name and version stay `eslint-plugin-codebase-ai-rules@0.3.0` until an intentional release decision changes them. `package.json` and `plugin.meta.version` carry the same version.
-- The package is ESM, runs checked-in `.mjs` source directly, and supports Node `^20.19.0 || ^22.13.0 || >=24.0.0`, matching the checked-in ESLint 10 toolchain.
+- The package is ESM, runs checked-in `.mjs` source directly (plus the one `.cjs` layout preset), and supports Node `^20.19.0 || ^22.13.0 || >=24.0.0`, matching the checked-in ESLint 10 toolchain.
 - `private: true` stays set. Do not npm-publish.
 - The plugin key is `codebase-ai-rules`.
 - `@typescript-eslint/parser` is a runtime dependency so consumers install no parser separately.
 - ESLint is a peer dependency and a development dependency for this repository.
 - `@eslint/markdown` is an optional peer dependency and a development dependency. Only `src/markdown.mjs` imports it. The package root must never load it, so `recommended` consumers install nothing new.
 - `@eslint/css` is an optional peer dependency and a development dependency. Only `src/design.mjs` imports it. The package root registers the design rules but must never load it. Token files are read by a small custom-property scanner in `src/design-tokens.mjs`, not by the CSS parser, for that reason.
+- `dependency-cruiser` is an optional peer dependency and an exact development dependency. Only the tests import it. `src/dependency-cruiser.cjs` is the one CommonJS file in `src/`, so a `.dependency-cruiser.cjs` config can `require` it. It requires nothing, so it never loads ESLint, `@eslint/css`, or `@eslint/markdown`.
+- `layout({ scope: "@hosti/" })` equals drunk-cat-stack's `.dependency-cruiser.cjs` exactly. `tests/fixtures/dependency-cruiser/drunk-cat-stack.cjs` is a copy of that file, and a test compares them. When drunk-cat-stack changes its rules, refresh the copy and the preset together.
 - Token files are parsed once per process and cached by absolute real path, modification time, and size.
 - Consumer path ignores do not belong in the preset.
 - The `comment-discipline` source and tests are ported from Hosti. Packaging and config are generalized; its semantics are not changed.

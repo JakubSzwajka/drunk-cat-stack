@@ -10,7 +10,9 @@ A small, private-GitHub-installable ESLint plugin with six rules:
   - `design-no-unknown-token`: `var(--name)` with no definition.
   - `design-scale-value`: values off a fixed scale.
 
-The package is ESM, runs directly from checked-in source, and supports `^20.19.0 || ^22.13.0 || >=24.0.0`, matching the ESLint 10 toolchain used by this repository.
+It also ships one preset that is not for ESLint: `layout()` from `eslint-plugin-codebase-ai-rules/dependency-cruiser`, a [Dependency Cruiser](https://github.com/sverweij/dependency-cruiser) config for apps-and-packages monorepos.
+
+The package is ESM, except for the CommonJS Dependency Cruiser preset. It runs directly from checked-in source and supports `^20.19.0 || ^22.13.0 || >=24.0.0`, matching the ESLint 10 toolchain used by this repository.
 
 The package is marked `private` in `package.json`. That blocks accidental npm publication. It does not block installation from GitHub.
 
@@ -129,6 +131,25 @@ See the rule documentation for what each rule reports and its options:
 
 Do not turn on `@eslint/css`'s own `no-invalid-properties` rule for a project whose tokens live in another file. It cannot see the token file, so it reports every token use as an unknown variable.
 
+## Configure Dependency Cruiser layout rules
+
+This entry point is a Dependency Cruiser config, not an ESLint config. It is CommonJS so a `.dependency-cruiser.cjs` file can `require` it, and it loads no other module. Install Dependency Cruiser next to this package:
+
+```sh
+npm install --save-dev --save-exact dependency-cruiser@18.4.0
+```
+
+```js
+// .dependency-cruiser.cjs
+module.exports = require("eslint-plugin-codebase-ai-rules/dependency-cruiser").layout({ scope: "@acme/" });
+```
+
+```sh
+npx depcruise --config .dependency-cruiser.cjs apps packages
+```
+
+`layout()` returns the whole config: 13 `forbidden` rules at error level and the `options` block. The rules keep apps and packages apart, keep a package's callers on its `src/index.ts`, keep delivery, server and use-cases layers apart, reject unresolved imports, and keep tests in `tests/` folders under `src/`. `scope` is required. Folder names are options. Append your own rules to the returned `forbidden` array. See [the preset documentation](docs/dependency-cruiser.md) for the options and the full rule list.
+
 ## Overrides
 
 Use a later config object for a deliberate override. Keep overrides narrow and document why the exception exists:
@@ -168,6 +189,7 @@ The exception list is closed. It covers syntax-owned directives only when they m
 ## Limitations
 
 - This package checks comment discipline, relative Markdown links and design-token use only. It does not replace a project's normal ESLint rules.
+- The Dependency Cruiser preset expects `<workspace>/src/` folders. Only folder names are options, not the overall shape.
 - It uses ESLint flat config and requires ESLint 9 or newer.
 - The TypeScript parser is supplied by this package, but TypeScript type-aware linting is not enabled.
 - The rule has no autofix. A human must decide whether to rename, type, assert, test, or retain the constrained code.
