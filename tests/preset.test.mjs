@@ -22,7 +22,7 @@ test("the preset lints supported files and leaves path ignores to consumers", as
     const [result] = await eslint.lintText("// Must be linted.\nconst value = 1;", { filePath });
     assert.deepEqual(
       result.messages.map((message) => message.ruleId),
-      ["codebase-ai-rules/comment-discipline"],
+      ["house-rules/comment-discipline"],
       filePath,
     );
     assert.equal(await eslint.isPathIgnored(filePath), false, filePath);

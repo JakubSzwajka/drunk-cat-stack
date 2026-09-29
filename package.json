@@ -1,6 +1,6 @@
 {
-  "name": "eslint-plugin-codebase-ai-rules",
-  "version": "0.4.0",
+  "name": "@jakubszwajka/house-rules",
+  "version": "0.5.0",
   "private": true,
   "description": "House rules and house configs for AI-assisted codebases: ESLint rules (comment discipline, broken Markdown links, design tokens), a Dependency Cruiser layout preset, TypeScript and Biome presets, and an exact-pins checker.",
   "license": "MIT",
@@ -16,7 +16,7 @@
     "LICENSE"
   ],
   "bin": {
-    "codebase-ai-rules-pins": "bin/pins.mjs"
+    "house-rules-pins": "bin/pins.mjs"
   },
   "exports": {
     ".": {
@@ -46,7 +46,7 @@
     "pack:check": "npm pack --dry-run"
   },
   "engines": {
-    "node": "^20.19.0 || ^22.13.0 || >=24.0.0"
+    "node": ">=24.21.0"
   },
   "peerDependencies": {
     "@eslint/css": "^2.0.0",
@@ -78,10 +78,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules.git"
+    "url": "git+ssh://git@github.com/JakubSzwajka/house-rules.git"
   },
   "bugs": {
-    "url": "https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/issues"
+    "url": "https://github.com/JakubSzwajka/house-rules/issues"
   },
-  "homepage": "https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules"
+  "homepage": "https://github.com/JakubSzwajka/house-rules"
 }

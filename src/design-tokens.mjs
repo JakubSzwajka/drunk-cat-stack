@@ -60,7 +60,7 @@ function fileDefinitions(file) {
   try {
     stamp = stampOf(file);
   } catch {
-    throw new Error(`codebase-ai-rules: token file "${file}" does not exist or cannot be read.`);
+    throw new Error(`house-rules: token file "${file}" does not exist or cannot be read.`);
   }
   const cached = definitionsByFile.get(file);
   if (cached?.stamp === stamp) return cached.definitions;

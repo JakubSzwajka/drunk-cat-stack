@@ -3,7 +3,7 @@ import test from "node:test";
 import { commentMessages, eslintMessages, lintComments } from "./test-helpers.mjs";
 
 function commentViolationCount(code) {
-  return lintComments(code).filter((message) => message.ruleId === "codebase-ai-rules/comment-discipline")
+  return lintComments(code).filter((message) => message.ruleId === "house-rules/comment-discipline")
     .length;
 }
 

@@ -29,11 +29,6 @@ const workspaceManifests = () => {
     console.error("pins: no `packages:` list found in pnpm-workspace.yaml");
     process.exit(1);
   }
-  // fs.globSync arrived in Node 22; a namespace import keeps explicit-path mode working on Node 20.
-  if (typeof fs.globSync !== "function") {
-    console.error("pins: reading pnpm-workspace.yaml needs Node 22 or newer; pass manifest paths instead");
-    process.exit(1);
-  }
   return ["package.json", ...fs.globSync(patterns).sort()];
 };
 

@@ -40,15 +40,15 @@ test("design() returns a CSS block and a source block with the token files passe
   assert.deepEqual(cssBlock.files, ["**/*.css"]);
   assert.equal(cssBlock.language, "css/css");
   assert.equal(cssBlock.plugins.css, css);
-  assert.equal(cssBlock.plugins["codebase-ai-rules"], plugin);
+  assert.equal(cssBlock.plugins["house-rules"], plugin);
   assert.deepEqual(cssBlock.rules, {
-    "codebase-ai-rules/design-no-raw-color": ["error", { tokenFiles: ["tokens.css"] }],
-    "codebase-ai-rules/design-no-unknown-token": ["error", { tokenFiles: ["tokens.css"] }],
-    "codebase-ai-rules/design-scale-value": "off",
+    "house-rules/design-no-raw-color": ["error", { tokenFiles: ["tokens.css"] }],
+    "house-rules/design-no-unknown-token": ["error", { tokenFiles: ["tokens.css"] }],
+    "house-rules/design-scale-value": "off",
   });
   assert.deepEqual(sourceBlock.files, ["**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}"]);
   assert.equal(sourceBlock.languageOptions.parser, tsParser);
-  assert.deepEqual(sourceBlock.rules, { "codebase-ai-rules/design-no-raw-color-literal": "error" });
+  assert.deepEqual(sourceBlock.rules, { "house-rules/design-no-raw-color-literal": "error" });
 });
 
 test("design() options: per-rule options, false turns a rule off, and blocks can be skipped", () => {
@@ -62,11 +62,11 @@ test("design() options: per-rule options, false turns a rule off, and blocks can
     },
   });
   assert.deepEqual(cssBlock.rules, {
-    "codebase-ai-rules/design-no-raw-color": ["error", { tokenFiles: ["a.css"], allowIn: ["legacy/**"], suggestNearest: false }],
-    "codebase-ai-rules/design-no-unknown-token": "off",
-    "codebase-ai-rules/design-scale-value": ["error", [{ property: "radius", allowed: ["4px"] }]],
+    "house-rules/design-no-raw-color": ["error", { tokenFiles: ["a.css"], allowIn: ["legacy/**"], suggestNearest: false }],
+    "house-rules/design-no-unknown-token": "off",
+    "house-rules/design-scale-value": ["error", [{ property: "radius", allowed: ["4px"] }]],
   });
-  assert.deepEqual(sourceBlock.rules, { "codebase-ai-rules/design-no-raw-color-literal": ["error", { skipVarFallback: false }] });
+  assert.deepEqual(sourceBlock.rules, { "house-rules/design-no-raw-color-literal": ["error", { skipVarFallback: false }] });
   assert.deepEqual(design({ source: false }).map(({ language }) => language), ["css/css"]);
   assert.deepEqual(design({ css: false }).map(({ language }) => language), [undefined]);
   assert.throws(() => design({ rules: { "no-raw-color": false } }), /unknown rule "no-raw-color"/);

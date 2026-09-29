@@ -1,6 +1,6 @@
 # Comment discipline rule
 
-Rule ID: `codebase-ai-rules/comment-discipline`
+Rule ID: `house-rules/comment-discipline`
 
 The rule keeps comments close to the code whose constraint they explain. It asks the author to remove comments that restate code and to prefer a clearer name, type, constant, assertion, or test. A retained comment must be a one-line, necessary, non-obvious why beside the constrained code.
 

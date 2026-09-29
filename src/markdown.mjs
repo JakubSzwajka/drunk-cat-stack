@@ -6,14 +6,14 @@ const markdownConfig = [
     files: ["**/*.md"],
     plugins: {
       markdown,
-      "codebase-ai-rules": plugin,
+      "house-rules": plugin,
     },
     language: "markdown/gfm",
     languageOptions: {
       frontmatter: "yaml",
     },
     rules: {
-      "codebase-ai-rules/no-broken-relative-links": "error",
+      "house-rules/no-broken-relative-links": "error",
     },
   },
 ];

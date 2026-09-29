@@ -1,8 +1,8 @@
 # Design: no raw colour rule
 
-Rule ID: `codebase-ai-rules/design-no-raw-color`
+Rule ID: `house-rules/design-no-raw-color`
 
-The rule runs on the `@eslint/css` language. It reports a colour written out in a CSS declaration value instead of taken from a design token. Use the `eslint-plugin-codebase-ai-rules/design` factory to enable it.
+The rule runs on the `@eslint/css` language. It reports a colour written out in a CSS declaration value instead of taken from a design token. Use the `@jakubszwajka/house-rules/design` factory to enable it.
 
 ```css
 .drop[data-over] {

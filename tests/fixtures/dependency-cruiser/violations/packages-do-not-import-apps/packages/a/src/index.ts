@@ -1,1 +1,1 @@
-export { web } from "../../../apps/web/src/web";
+export { web } from "../../../apps/web/src/main";

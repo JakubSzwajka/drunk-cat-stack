@@ -1,6 +1,6 @@
 # Biome preset
 
-Import path: `eslint-plugin-codebase-ai-rules/biome`
+Import path: `@jakubszwajka/house-rules/biome`
 
 It is drunk-cat-stack's `biome.json` without the `files` block: formatter on (spaces, indent 2, line width 100), assist off, and the linter with `preset: "none"` plus four rules.
 
@@ -15,7 +15,7 @@ It is drunk-cat-stack's `biome.json` without the `files` block: formatter on (sp
 // biome.json
 {
   "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
-  "extends": ["eslint-plugin-codebase-ai-rules/biome"],
+  "extends": ["@jakubszwajka/house-rules/biome"],
   "files": {
     "includes": ["**", "!!node_modules", "!!dist", "!!coverage", "!!generated", "!!.agent_sources"]
   }

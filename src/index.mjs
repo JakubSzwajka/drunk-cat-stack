@@ -8,8 +8,8 @@ import { noBrokenRelativeLinksRule } from "./no-broken-relative-links.mjs";
 
 const plugin = {
   meta: {
-    name: "eslint-plugin-codebase-ai-rules",
-    version: "0.4.0",
+    name: "@jakubszwajka/house-rules",
+    version: "0.5.0",
   },
   rules: {
     "comment-discipline": commentDisciplineRule,
@@ -37,10 +37,10 @@ plugin.configs.recommended = [
       },
     },
     plugins: {
-      "codebase-ai-rules": plugin,
+      "house-rules": plugin,
     },
     rules: {
-      "codebase-ai-rules/comment-discipline": "error",
+      "house-rules/comment-discipline": "error",
     },
   },
 ];

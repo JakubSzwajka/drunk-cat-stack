@@ -219,7 +219,7 @@ test("reports one actionable diagnostic for a group that fails both rules", () =
 
   assert.equal(messages.length, 1);
   const [message] = messages;
-  assert.equal(message.ruleId, "codebase-ai-rules/comment-discipline");
+  assert.equal(message.ruleId, "house-rules/comment-discipline");
   assert.equal(message.message, EXPECTED_MESSAGE);
   assert.equal(message.line, 1);
   assert.equal(message.column, 1);

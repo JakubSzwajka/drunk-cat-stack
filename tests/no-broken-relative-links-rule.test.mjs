@@ -68,13 +68,13 @@ test("RuleTester runs the rule on the Markdown language with exact locations", (
 test("the roots option accepts only an array of unique non-empty strings", () => {
   const linter = new Linter({ cwd: root });
   const verify = (options) =>
-    linter.verify("[x](./setup.md)", [{ files: ["**/*.md"], plugins: { markdown, "codebase-ai-rules": plugin }, language: "markdown/gfm", rules: { [RULE_ID]: ["error", options] } }], {
+    linter.verify("[x](./setup.md)", [{ files: ["**/*.md"], plugins: { markdown, "house-rules": plugin }, language: "markdown/gfm", rules: { [RULE_ID]: ["error", options] } }], {
       filename: path.join(root, "docs/page.md"),
     });
 
   assert.deepEqual(verify({ roots: [] }), []);
   for (const options of [{ roots: "packages/sdk" }, { roots: [""] }, { roots: ["a", "a"] }, { other: true }]) {
-    assert.throws(() => verify(options), /Key "codebase-ai-rules\/no-broken-relative-links"/, JSON.stringify(options));
+    assert.throws(() => verify(options), /Key "house-rules\/no-broken-relative-links"/, JSON.stringify(options));
   }
 });
 
@@ -144,7 +144,7 @@ test("a repository with no index yet has an empty tracked set until the first gi
 });
 
 test("git ls-files runs once per repository root while the index is unchanged", { skip: process.platform === "win32" }, () => {
-  const shim = createDirectory("codebase-ai-rules-git-shim-");
+  const shim = createDirectory("house-rules-git-shim-");
   const log = path.join(shim, "calls.log");
   const realGit = execFileSync("sh", ["-c", "command -v git"], { encoding: "utf8" }).trim();
   writeFiles(shim, { git: `#!/bin/sh\necho "$*" >> "${log}"\nexec "${realGit}" "$@"\n` });
@@ -171,7 +171,7 @@ test("git ls-files runs once per repository root while the index is unchanged", 
 });
 
 test("outside a git repository the rule checks the file system under cwd with exact case", () => {
-  const plain = createDirectory("codebase-ai-rules-plain-");
+  const plain = createDirectory("house-rules-plain-");
   try {
     assert.throws(() => execFileSync("git", ["rev-parse", "--show-toplevel"], { cwd: plain, stdio: "pipe" }));
     writeFiles(plain, { "README.md": "# Readme\n", "docs/setup.md": "# Setup\n" });

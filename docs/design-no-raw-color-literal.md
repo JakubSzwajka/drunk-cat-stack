@@ -1,8 +1,8 @@
 # Design: no raw colour literal rule
 
-Rule ID: `codebase-ai-rules/design-no-raw-color-literal`
+Rule ID: `house-rules/design-no-raw-color-literal`
 
-The rule runs on JavaScript and TypeScript, JSX and TSX included. It reports a hex colour or a colour function written inside a string literal or template text. Use the `eslint-plugin-codebase-ai-rules/design` factory to enable it.
+The rule runs on JavaScript and TypeScript, JSX and TSX included. It reports a hex colour or a colour function written inside a string literal or template text. Use the `@jakubszwajka/house-rules/design` factory to enable it.
 
 ```tsx
 <div style={{ color: "var(--ink)" }} />          // passes

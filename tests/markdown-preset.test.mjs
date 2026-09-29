@@ -16,7 +16,7 @@ test("the markdown preset enables only the relative-link rule on GFM with YAML f
   assert.equal(config.language, "markdown/gfm");
   assert.deepEqual(config.languageOptions, { frontmatter: "yaml" });
   assert.equal(config.plugins.markdown, markdown);
-  assert.equal(config.plugins["codebase-ai-rules"], plugin);
+  assert.equal(config.plugins["house-rules"], plugin);
   assert.deepEqual(config.rules, { [RULE_ID]: "error" });
 });
 

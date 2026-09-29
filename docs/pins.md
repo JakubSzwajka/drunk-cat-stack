@@ -1,6 +1,6 @@
 # Exact-pins checker
 
-Bin: `codebase-ai-rules-pins` (`bin/pins.mjs`)
+Bin: `house-rules-pins` (`bin/pins.mjs`)
 
 Moved from drunk-cat-stack's `scripts/check-exact-pins.mjs` with the same behavior, messages and exit codes. Its tests moved too, to `tests/pins.test.mjs`.
 
@@ -8,7 +8,7 @@ Moved from drunk-cat-stack's `scripts/check-exact-pins.mjs` with the same behavi
 // package.json
 {
   "scripts": {
-    "pins": "codebase-ai-rules-pins"
+    "pins": "house-rules-pins"
   }
 }
 ```
@@ -33,7 +33,3 @@ Every entry in `dependencies`, `devDependencies` and `optionalDependencies` must
 
 - `0`: prints `pins: every dependency is exact in <paths>`.
 - `1`: prints `Dependencies in <path> must be exact versions or full commit SHAs:` and one `  <field>.<name>: <spec>` line per loose entry, to stderr.
-
-## Node versions
-
-Workspace mode uses `fs.globSync`, which Node 22 added. On Node 20 the bin still checks paths passed as arguments. Without arguments it exits 1 with `pins: reading pnpm-workspace.yaml needs Node 22 or newer; pass manifest paths instead`. The workspace tests skip on Node 20.

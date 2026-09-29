@@ -1,8 +1,8 @@
 # No broken relative links rule
 
-Rule ID: `codebase-ai-rules/no-broken-relative-links`
+Rule ID: `house-rules/no-broken-relative-links`
 
-The rule runs on the `@eslint/markdown` language. It reports a Markdown link, image, or link reference definition when its relative target is not a path that git tracks in the repository that holds the linted file. Use the `eslint-plugin-codebase-ai-rules/markdown` preset to enable it.
+The rule runs on the `@eslint/markdown` language. It reports a Markdown link, image, or link reference definition when its relative target is not a path that git tracks in the repository that holds the linted file. Use the `@jakubszwajka/house-rules/markdown` preset to enable it.
 
 ```md
 See the [setup guide](./setup.md).        <!-- passes when docs/setup.md is tracked -->
@@ -74,14 +74,14 @@ When roots are nested, the longest matching root wins. `./` prefixes and trailin
 
 ```js
 // eslint.config.mjs
-import codebaseAiMarkdown from "eslint-plugin-codebase-ai-rules/markdown";
+import houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";
 
 export default [
-  ...codebaseAiMarkdown,
+  ...houseRulesMarkdown,
   {
     files: ["**/*.md"],
     rules: {
-      "codebase-ai-rules/no-broken-relative-links": ["error", { roots: ["packages/sdk"] }],
+      "house-rules/no-broken-relative-links": ["error", { roots: ["packages/sdk"] }],
     },
   },
 ];

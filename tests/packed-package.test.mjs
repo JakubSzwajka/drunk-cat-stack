@@ -30,11 +30,11 @@ async function writeFixtureFiles(fixtureDirectory) {
 
   await writeFile(
     path.join(fixtureDirectory, "eslint.config.mjs"),
-    'import codebaseAiRules from "eslint-plugin-codebase-ai-rules";\nimport design from "eslint-plugin-codebase-ai-rules/design";\nimport codebaseAiMarkdown from "eslint-plugin-codebase-ai-rules/markdown";\n\nexport default [\n  ...codebaseAiRules.configs.recommended,\n  ...codebaseAiMarkdown,\n  ...design({\n    tokenFiles: ["styles/tokens.css"],\n    source: { files: ["**/*.tsx"] },\n    rules: { "design-scale-value": [{ property: "radius$", allowed: ["4px"] }] },\n  }),\n];\n',
+    'import houseRules from "@jakubszwajka/house-rules";\nimport design from "@jakubszwajka/house-rules/design";\nimport houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";\n\nexport default [\n  ...houseRules.configs.recommended,\n  ...houseRulesMarkdown,\n  ...design({\n    tokenFiles: ["styles/tokens.css"],\n    source: { files: ["**/*.tsx"] },\n    rules: { "design-scale-value": [{ property: "radius$", allowed: ["4px"] }] },\n  }),\n];\n',
   );
   await writeFile(
     path.join(fixtureDirectory, ".dependency-cruiser.cjs"),
-    'module.exports = require("eslint-plugin-codebase-ai-rules/dependency-cruiser").layout({ scope: "@acme/" });\n',
+    'module.exports = require("@jakubszwajka/house-rules/dependency-cruiser").layout({ scope: "@acme/" });\n',
   );
   await writeFile(path.join(fixtureDirectory, "pinned.json"), '{ "devDependencies": { "a": "1.2.3" } }\n');
   await writeFile(
@@ -68,22 +68,22 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { ESLint } from "eslint";
-import codebaseAiRules from "eslint-plugin-codebase-ai-rules";
-import { layout } from "eslint-plugin-codebase-ai-rules/dependency-cruiser";
+import houseRules from "@jakubszwajka/house-rules";
+import { layout } from "@jakubszwajka/house-rules/dependency-cruiser";
 
-assert.equal(codebaseAiRules.meta.name, "eslint-plugin-codebase-ai-rules");
-assert.equal(codebaseAiRules.configs.recommended[0].rules["codebase-ai-rules/comment-discipline"], "error");
-assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules"), /node_modules/);
-assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/markdown"), /node_modules/);
-assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/design"), /node_modules/);
-assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/dependency-cruiser"), /node_modules/);
-assert.equal(codebaseAiRules.meta.version, ${JSON.stringify(packageVersion)});
+assert.equal(houseRules.meta.name, "@jakubszwajka/house-rules");
+assert.equal(houseRules.configs.recommended[0].rules["house-rules/comment-discipline"], "error");
+assert.match(import.meta.resolve("@jakubszwajka/house-rules"), /node_modules/);
+assert.match(import.meta.resolve("@jakubszwajka/house-rules/markdown"), /node_modules/);
+assert.match(import.meta.resolve("@jakubszwajka/house-rules/design"), /node_modules/);
+assert.match(import.meta.resolve("@jakubszwajka/house-rules/dependency-cruiser"), /node_modules/);
+assert.equal(houseRules.meta.version, ${JSON.stringify(packageVersion)});
 for (const preset of ["tsconfig/strict.json", "tsconfig/effect.json", "biome"]) {
-  const file = new URL(import.meta.resolve(\`eslint-plugin-codebase-ai-rules/\${preset}\`));
-  assert.match(file.pathname, /node_modules\\/eslint-plugin-codebase-ai-rules\\//);
+  const file = new URL(import.meta.resolve(\`@jakubszwajka/house-rules/\${preset}\`));
+  assert.match(file.pathname, /node_modules\\/@jakubszwajka\\/house-rules\\//);
   assert.equal(typeof JSON.parse(readFileSync(file, "utf8")), "object");
 }
-const pins = spawnSync("node_modules/.bin/codebase-ai-rules-pins", ["pinned.json"], { encoding: "utf8" });
+const pins = spawnSync("node_modules/.bin/house-rules-pins", ["pinned.json"], { encoding: "utf8" });
 assert.equal(pins.status, 0, pins.stderr);
 assert.match(pins.stdout, /pins: every dependency is exact in pinned[.]json/);
 
@@ -110,8 +110,8 @@ assert.deepEqual(
     ruleIds: messages.map(({ ruleId }) => ruleId),
   })),
   [
-    { errorCount: 1, warningCount: 0, ruleIds: ["codebase-ai-rules/comment-discipline"] },
-    { errorCount: 1, warningCount: 0, ruleIds: ["codebase-ai-rules/comment-discipline"] },
+    { errorCount: 1, warningCount: 0, ruleIds: ["house-rules/comment-discipline"] },
+    { errorCount: 1, warningCount: 0, ruleIds: ["house-rules/comment-discipline"] },
   ],
 );
 
@@ -128,8 +128,8 @@ const [markdownFailing] = await eslint.lintFiles(["fail.md"]);
 assert.deepEqual(
   markdownFailing.messages.map(({ ruleId, line, column }) => ({ ruleId, line, column })),
   [
-    { ruleId: "codebase-ai-rules/no-broken-relative-links", line: 3, column: 5 },
-    { ruleId: "codebase-ai-rules/no-broken-relative-links", line: 3, column: 33 },
+    { ruleId: "house-rules/no-broken-relative-links", line: 3, column: 5 },
+    { ruleId: "house-rules/no-broken-relative-links", line: 3, column: 33 },
   ],
 );
 
@@ -143,22 +143,22 @@ const [designFailing, sourceFailing] = await eslint.lintFiles(["styles/fail.css"
 assert.deepEqual(
   designFailing.messages.map(({ ruleId, line, message }) => ({ ruleId, line, message })),
   [
-    { ruleId: "codebase-ai-rules/design-no-raw-color", line: 2, message: 'Raw colour "#fff". Use a design token; the nearest is var(--paper).' },
-    { ruleId: "codebase-ai-rules/design-no-raw-color", line: 3, message: 'Raw colour "#2c3234". Use a design token; the nearest is var(--ink).' },
-    { ruleId: "codebase-ai-rules/design-no-unknown-token", line: 4, message: "var(--missing) has no definition in the token files or in this file." },
-    { ruleId: "codebase-ai-rules/design-scale-value", line: 5, message: 'border-radius "5px" has values off the scale: 5px. Allowed: 4px.' },
+    { ruleId: "house-rules/design-no-raw-color", line: 2, message: 'Raw colour "#fff". Use a design token; the nearest is var(--paper).' },
+    { ruleId: "house-rules/design-no-raw-color", line: 3, message: 'Raw colour "#2c3234". Use a design token; the nearest is var(--ink).' },
+    { ruleId: "house-rules/design-no-unknown-token", line: 4, message: "var(--missing) has no definition in the token files or in this file." },
+    { ruleId: "house-rules/design-scale-value", line: 5, message: 'border-radius "5px" has values off the scale: 5px. Allowed: 4px.' },
   ],
 );
 assert.deepEqual(
   sourceFailing.messages.map(({ ruleId, line }) => ({ ruleId, line })),
-  [{ ruleId: "codebase-ai-rules/design-no-raw-color-literal", line: 1 }],
+  [{ ruleId: "house-rules/design-no-raw-color-literal", line: 1 }],
 );
 `,
   );
 }
 
 test("packs and installs the exact package before linting fresh JS, TS, Markdown, and design fixtures, loading the dependency-cruiser preset, resolving the config presets, and running the pins bin", async () => {
-  const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), "codebase-ai-rules-pack-"));
+  const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), "house-rules-pack-"));
   const packageDirectory = path.join(temporaryDirectory, "package");
   const fixtureDirectory = path.join(temporaryDirectory, "fixture");
   await Promise.all([mkdir(packageDirectory, { recursive: true }), mkdir(fixtureDirectory, { recursive: true })]);
@@ -174,7 +174,7 @@ test("packs and installs the exact package before linting fresh JS, TS, Markdown
     await writeFixtureFiles(fixtureDirectory);
     const packageJsonPath = path.join(fixtureDirectory, "package.json");
     const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8"));
-    packageJson.dependencies["eslint-plugin-codebase-ai-rules"] = `file:${path.join(packageDirectory, packageArchive)}`;
+    packageJson.dependencies["@jakubszwajka/house-rules"] = `file:${path.join(packageDirectory, packageArchive)}`;
     await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n");
 
     // ESLint is installed at the exact version resolved by this repository's lockfile.

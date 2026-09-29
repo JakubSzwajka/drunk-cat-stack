@@ -36,15 +36,12 @@ const checkWorkspace = (files) => {
   }
 };
 
-// Workspace mode uses fs.globSync, which Node 20 lacks.
-const workspaceIt = typeof fs.globSync === "function" ? it : it.skip;
-
 const WORKSPACE_YAML = 'packages:\n  - "apps/*"\n  - packages/*\n\nsaveExact: true\n';
 
-describe("codebase-ai-rules-pins", () => {
+describe("house-rules-pins", () => {
   it("is the package bin", () => {
     const manifest = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-    assert.equal(manifest.bin["codebase-ai-rules-pins"], "bin/pins.mjs");
+    assert.equal(manifest.bin["house-rules-pins"], "bin/pins.mjs");
     assert.match(fs.readFileSync(script, "utf8"), /^#!\/usr\/bin\/env node\n/);
   });
 });
@@ -88,7 +85,7 @@ describe("exact pin check", () => {
     assert.match(result.stderr, /packageManager: pnpm@latest/);
   });
 
-  workspaceIt("checks the root and every workspace package.json when given no path", () => {
+  it("checks the root and every workspace package.json when given no path", () => {
     const result = checkWorkspace({
       "pnpm-workspace.yaml": WORKSPACE_YAML,
       "package.json": { devDependencies: { a: "1.2.3" } },
@@ -100,7 +97,7 @@ describe("exact pin check", () => {
     assert.doesNotMatch(result.stderr, /apps\/web/);
   });
 
-  workspaceIt("passes a workspace whose manifests are all exact", () => {
+  it("passes a workspace whose manifests are all exact", () => {
     const result = checkWorkspace({
       "pnpm-workspace.yaml": WORKSPACE_YAML,
       "package.json": { devDependencies: { a: "1.2.3" } },
@@ -111,7 +108,7 @@ describe("exact pin check", () => {
     assert.match(result.stdout, /apps\/web\/package\.json, packages\/core\/package\.json/);
   });
 
-  workspaceIt("fails when pnpm-workspace.yaml lists no packages", () => {
+  it("fails when pnpm-workspace.yaml lists no packages", () => {
     const result = checkWorkspace({
       "pnpm-workspace.yaml": "saveExact: true\n",
       "package.json": { devDependencies: { a: "1.2.3" } },

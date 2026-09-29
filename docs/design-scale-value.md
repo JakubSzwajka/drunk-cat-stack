@@ -1,8 +1,8 @@
 # Design: scale value rule
 
-Rule ID: `codebase-ai-rules/design-scale-value`
+Rule ID: `house-rules/design-scale-value`
 
-The rule runs on the `@eslint/css` language. For the properties you list, it requires each value to come from a fixed scale or from a token variable. It does nothing until you configure it. Use the `eslint-plugin-codebase-ai-rules/design` factory to enable it.
+The rule runs on the `@eslint/css` language. For the properties you list, it requires each value to come from a fixed scale or from a token variable. It does nothing until you configure it. Use the `@jakubszwajka/house-rules/design` factory to enable it.
 
 ```js
 design({

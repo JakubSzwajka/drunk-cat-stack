@@ -35,7 +35,7 @@ export function sourceRuleTester() {
 }
 
 export function temporaryDirectory(files = {}) {
-  const root = realpathSync(mkdtempSync(path.join(os.tmpdir(), "codebase-ai-rules-design-")));
+  const root = realpathSync(mkdtempSync(path.join(os.tmpdir(), "house-rules-design-")));
   for (const [file, content] of Object.entries(files)) {
     const absolute = path.join(root, file);
     mkdirSync(path.dirname(absolute), { recursive: true });
@@ -55,7 +55,7 @@ export async function lintWith(cwd, config, patterns) {
     .flatMap(({ filePath, messages }) =>
       messages.map(({ ruleId, message, line, column, fatal }) => ({
         file: path.relative(cwd, filePath).split(path.sep).join("/"),
-        rule: fatal ? "fatal" : ruleId.replace("codebase-ai-rules/", ""),
+        rule: fatal ? "fatal" : ruleId.replace("house-rules/", ""),
         line,
         column,
         message,

@@ -17,14 +17,14 @@ async function lint(code, filePath) {
 
 test("exports plugin metadata and a flat preset for every supported extension", () => {
   assert.deepEqual(plugin.meta, {
-    name: "eslint-plugin-codebase-ai-rules",
-    version: "0.4.0",
+    name: "@jakubszwajka/house-rules",
+    version: "0.5.0",
   });
   assert.deepEqual(plugin.configs.recommended[0].files, [
     "**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
   ]);
-  assert.equal(plugin.configs.recommended[0].plugins["codebase-ai-rules"], plugin);
-  assert.equal(plugin.configs.recommended[0].rules["codebase-ai-rules/comment-discipline"], "error");
+  assert.equal(plugin.configs.recommended[0].plugins["house-rules"], plugin);
+  assert.equal(plugin.configs.recommended[0].rules["house-rules/comment-discipline"], "error");
 });
 
 test("lints JavaScript, TypeScript, JSX, TSX, MJS, CJS, MTS, and CTS through ESLint", async () => {
@@ -59,7 +59,7 @@ test("allows legal and tool directives, including CRLF and Unicode line grouping
 
   assert.deepEqual(await lint(code, "directives.ts"), [
     {
-      ruleId: "codebase-ai-rules/comment-discipline",
+      ruleId: "house-rules/comment-discipline",
       severity: 2,
       message: plugin.rules["comment-discipline"].meta.messages.rework,
       line: 4,
@@ -90,9 +90,9 @@ function run() {
   assert.deepEqual(
     messages.map(({ ruleId, line, endLine }) => ({ ruleId, line, endLine })),
     [
-      { ruleId: "codebase-ai-rules/comment-discipline", line: 1, endLine: 1 },
-      { ruleId: "codebase-ai-rules/comment-discipline", line: 5, endLine: 6 },
-      { ruleId: "codebase-ai-rules/comment-discipline", line: 7, endLine: 8 },
+      { ruleId: "house-rules/comment-discipline", line: 1, endLine: 1 },
+      { ruleId: "house-rules/comment-discipline", line: 5, endLine: 6 },
+      { ruleId: "house-rules/comment-discipline", line: 7, endLine: 8 },
     ],
   );
 });

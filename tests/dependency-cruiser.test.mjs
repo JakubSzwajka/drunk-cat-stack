@@ -35,7 +35,7 @@ const ALSO_FIRES = { "no-unresolved-deep-package-imports": ["no-unresolved-impor
 // Copies a fixture tree to a temporary workspace and links each package into node_modules, as pnpm does.
 // A stub `test-runner` package stands in for a third-party import such as `@effect/vitest`.
 async function violatedRules(fixture, config) {
-  const workspace = await mkdtemp(path.join(os.tmpdir(), "codebase-ai-rules-depcruise-"));
+  const workspace = await mkdtemp(path.join(os.tmpdir(), "house-rules-depcruise-"));
   try {
     await cp(path.join(FIXTURES, fixture), workspace, { recursive: true });
     await mkdir(path.join(workspace, "node_modules/test-runner"), { recursive: true });

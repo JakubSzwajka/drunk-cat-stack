@@ -2,7 +2,7 @@ import css from "@eslint/css";
 import tsParser from "@typescript-eslint/parser";
 import plugin from "./index.mjs";
 
-const PREFIX = "codebase-ai-rules";
+const PREFIX = "house-rules";
 const CSS_RULES = ["design-no-raw-color", "design-no-unknown-token", "design-scale-value"];
 const SOURCE_RULES = ["design-no-raw-color-literal"];
 const TOKEN_RULES = new Set(["design-no-raw-color", "design-no-unknown-token"]);

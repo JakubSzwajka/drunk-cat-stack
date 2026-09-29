@@ -5,7 +5,7 @@ import path from "node:path";
 import { Linter } from "eslint";
 import markdownConfig from "../src/markdown.mjs";
 
-export const RULE_ID = "codebase-ai-rules/no-broken-relative-links";
+export const RULE_ID = "house-rules/no-broken-relative-links";
 
 export function writeFiles(root, files) {
   for (const [file, content] of Object.entries(files)) {
@@ -20,7 +20,7 @@ export function createDirectory(prefix) {
 }
 
 export function createGitRepository({ tracked = {}, untracked = {} } = {}) {
-  const root = createDirectory("codebase-ai-rules-git-");
+  const root = createDirectory("house-rules-git-");
   execFileSync("git", ["init", "--quiet"], { cwd: root, stdio: "pipe" });
   writeFiles(root, tracked);
   writeFiles(root, untracked);
