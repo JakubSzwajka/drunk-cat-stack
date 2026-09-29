@@ -9,7 +9,7 @@ import { noBrokenRelativeLinksRule } from "./no-broken-relative-links.mjs";
 const plugin = {
   meta: {
     name: "eslint-plugin-codebase-ai-rules",
-    version: "0.3.0",
+    version: "0.4.0",
   },
   rules: {
     "comment-discipline": commentDisciplineRule,

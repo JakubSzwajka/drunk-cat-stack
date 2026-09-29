@@ -8,7 +8,8 @@ const DEFAULTS = {
   testsDir: "tests",
 };
 const DEFAULT_LAYERS = { delivery: "delivery", server: "server", useCases: "use-cases" };
-const OPTION_NAMES = new Set(["scope", "layers", ...Object.keys(DEFAULTS)]);
+const DEFAULT_NAME_LISTS = { appEntryFiles: ["main.ts", "index.ts"], ownerlessNames: ["utils", "helpers", "misc"] };
+const OPTION_NAMES = new Set(["scope", "layers", ...Object.keys(DEFAULTS), ...Object.keys(DEFAULT_NAME_LISTS)]);
 const BUILT_IN_TEST_DIRS = new Set(["test", "tests", "__tests__"]);
 
 const EXCLUDED_PATH = "(?:^|/)(?:node_modules|dist|coverage|generated|[.]turbo|[.]agent_sources)(?:/|$)";
@@ -30,6 +31,18 @@ function scopeOption(scope) {
     throw new TypeError('layout(): scope is required, for example "@acme/".');
   }
   return escape(scope.endsWith("/") ? scope : `${scope}/`);
+}
+
+function nameListOption(names, label, { allowEmpty }) {
+  const valid =
+    Array.isArray(names) &&
+    (allowEmpty || names.length > 0) &&
+    names.every((name) => typeof name === "string" && name && !name.includes("/"));
+  if (!valid) {
+    const size = allowEmpty ? "an array" : "a non-empty array";
+    throw new TypeError(`layout(): ${label} must be ${size} of names without "/".`);
+  }
+  return names.map(escape);
 }
 
 function layerOptions(layers) {
@@ -56,6 +69,12 @@ function patterns(options) {
   const tests = pathOption(settings.testsDir, "testsDir");
   const layers = layerOptions(settings.layers ?? {});
   const layerRoot = (layer) => `^${apps}/[^/]+/src/${layer}(?:/|$)`;
+  const entryFiles = nameListOption(settings.appEntryFiles ?? DEFAULT_NAME_LISTS.appEntryFiles, "appEntryFiles", {
+    allowEmpty: true,
+  });
+  const ownerless = nameListOption(settings.ownerlessNames ?? DEFAULT_NAME_LISTS.ownerlessNames, "ownerlessNames", {
+    allowEmpty: false,
+  });
   const testDirs = BUILT_IN_TEST_DIRS.has(settings.testsDir) ? "tests?|__tests__" : `tests?|__tests__|${tests}`;
   const testFile = "[.](?:test|spec)[.][^/]+$";
 
@@ -70,6 +89,14 @@ function patterns(options) {
     deliveryRoot: layerRoot(layers.delivery),
     serverRoot: layerRoot(layers.server),
     useCasesRoot: layerRoot(layers.useCases),
+    appSource: `^${apps}/[^/]+/src/`,
+    appLayerOrEntry: [
+      `^${apps}/[^/]+/src/(?:${Object.values(layers).join("|")})/`,
+      ...(entryFiles.length ? [`^${apps}/[^/]+/src/(?:${entryFiles.join("|")})$`] : []),
+    ],
+    useCaseEntry: `^(${apps}/[^/]+/src/${layers.useCases}/[^/]+)`,
+    useCaseAny: `^${apps}/[^/]+/src/${layers.useCases}/[^/]+`,
+    ownerlessPath: `^(?:${apps}|${packages})/(?:.*/)?(?:${ownerless.join("|")})(?:[.][^/]*)?(?:/|$)`,
     testPath: `(?:^|/)(?:${testDirs})(?:/|$)|${testFile}`,
     testFile: `^(?:${apps}|${packages})/[^/]+/.*${testFile}`,
     testFileInTestsDir: `^(?:${apps}|${packages})/[^/]+/src/(?:${tests}|.*/${tests})/[^/]+${testFile}`,
@@ -79,6 +106,12 @@ function patterns(options) {
 
 function rule(name, from, to) {
   return { name, severity: "error", from, to };
+}
+
+// A module rule reports the file itself. A dependency rule would miss a file that imports nothing,
+// or only excluded node_modules packages. `numberOfDependentsLessThan: 100` stands in for "every module".
+function moduleRule(name, module) {
+  return { name, severity: "error", module: { ...module, numberOfDependentsLessThan: 100 }, from: {} };
 }
 
 // Returns a whole dependency-cruiser configuration. Append project rules to the returned `forbidden` array.
@@ -107,15 +140,17 @@ function layout(options = {}) {
       rule("use-cases-do-not-import-outer-layers", { path: p.useCasesRoot }, { path: [p.deliveryRoot, p.serverRoot] }),
       rule("no-unresolved-deep-package-imports", {}, { path: `${p.packageNamespace}[^/]+/.+`, couldNotResolve: true }),
       rule("production-does-not-import-tests", { path: p.sourceRoot, pathNot: p.testPath }, { path: p.testPath }),
-      // A module rule, because a test that imports nothing or only node_modules has no edge to report.
-      {
-        name: "tests-live-in-tests-dir",
-        severity: "error",
-        module: { path: p.testFile, pathNot: p.testFileInTestsDir, numberOfDependentsLessThan: 100 },
-        from: {},
-      },
+      moduleRule("tests-live-in-tests-dir", { path: p.testFile, pathNot: p.testFileInTestsDir }),
       rule("tests-do-not-import-internals", { path: p.testPath }, { path: p.internalRoot }),
       rule("no-unresolved-imports", {}, { couldNotResolve: true }),
+      moduleRule("app-code-in-layers", { path: p.appSource, pathNot: [...p.appLayerOrEntry, p.testPath] }),
+      // $1 is the importing use-case's top-level entry under use-cases/, a file or a folder.
+      rule(
+        "use-cases-do-not-import-use-cases",
+        { path: p.useCaseEntry, pathNot: p.testPath },
+        { path: p.useCaseAny, pathNot: ["^$1(?:/|$)", p.testPath] },
+      ),
+      moduleRule("no-ownerless-files", { path: p.ownerlessPath }),
     ],
     options: {
       parser: "swc",

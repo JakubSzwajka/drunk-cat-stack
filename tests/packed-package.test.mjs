@@ -36,6 +36,7 @@ async function writeFixtureFiles(fixtureDirectory) {
     path.join(fixtureDirectory, ".dependency-cruiser.cjs"),
     'module.exports = require("eslint-plugin-codebase-ai-rules/dependency-cruiser").layout({ scope: "@acme/" });\n',
   );
+  await writeFile(path.join(fixtureDirectory, "pinned.json"), '{ "devDependencies": { "a": "1.2.3" } }\n');
   await writeFile(
     path.join(fixtureDirectory, "pass.js"),
     "function run() {\n  // The retry must stay bounded by the caller's deadline.\n  return true;\n}\n",
@@ -63,6 +64,8 @@ async function writeFixtureFiles(fixtureDirectory) {
   await writeFile(
     path.join(fixtureDirectory, "verify-install.mjs"),
     `import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { ESLint } from "eslint";
 import codebaseAiRules from "eslint-plugin-codebase-ai-rules";
@@ -75,10 +78,18 @@ assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/markdown"), /n
 assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/design"), /node_modules/);
 assert.match(import.meta.resolve("eslint-plugin-codebase-ai-rules/dependency-cruiser"), /node_modules/);
 assert.equal(codebaseAiRules.meta.version, ${JSON.stringify(packageVersion)});
+for (const preset of ["tsconfig/strict.json", "tsconfig/effect.json", "biome"]) {
+  const file = new URL(import.meta.resolve(\`eslint-plugin-codebase-ai-rules/\${preset}\`));
+  assert.match(file.pathname, /node_modules\\/eslint-plugin-codebase-ai-rules\\//);
+  assert.equal(typeof JSON.parse(readFileSync(file, "utf8")), "object");
+}
+const pins = spawnSync("node_modules/.bin/codebase-ai-rules-pins", ["pinned.json"], { encoding: "utf8" });
+assert.equal(pins.status, 0, pins.stderr);
+assert.match(pins.stdout, /pins: every dependency is exact in pinned[.]json/);
 
 const dependencyCruiserConfig = createRequire(import.meta.url)("./.dependency-cruiser.cjs");
 assert.deepEqual(dependencyCruiserConfig, layout({ scope: "@acme/" }));
-assert.equal(dependencyCruiserConfig.forbidden.length, 13);
+assert.equal(dependencyCruiserConfig.forbidden.length, 16);
 assert.equal(dependencyCruiserConfig.options.parser, "swc");
 
 const eslint = new ESLint({ cwd: process.cwd(), overrideConfigFile: "eslint.config.mjs" });
@@ -146,7 +157,7 @@ assert.deepEqual(
   );
 }
 
-test("packs and installs the exact package before linting fresh JS, TS, Markdown, and design fixtures and loading the dependency-cruiser preset", async () => {
+test("packs and installs the exact package before linting fresh JS, TS, Markdown, and design fixtures, loading the dependency-cruiser preset, resolving the config presets, and running the pins bin", async () => {
   const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), "codebase-ai-rules-pack-"));
   const packageDirectory = path.join(temporaryDirectory, "package");
   const fixtureDirectory = path.join(temporaryDirectory, "fixture");

@@ -1,6 +1,8 @@
 # eslint-plugin-codebase-ai-rules
 
-A small, private-GitHub-installable ESLint plugin with six rules:
+The one installable home of the house rules and house configs. One exact pin brings all of it. The name still says "eslint-plugin" because five repositories pin it; a rename is deferred.
+
+It has six ESLint rules:
 
 - `comment-discipline`, Hosti's comment rule for JavaScript and TypeScript, enabled by `configs.recommended`.
 - `no-broken-relative-links`, which reports relative Markdown links whose target git does not track, enabled by the `eslint-plugin-codebase-ai-rules/markdown` preset.
@@ -10,7 +12,17 @@ A small, private-GitHub-installable ESLint plugin with six rules:
   - `design-no-unknown-token`: `var(--name)` with no definition.
   - `design-scale-value`: values off a fixed scale.
 
-It also ships one preset that is not for ESLint: `layout()` from `eslint-plugin-codebase-ai-rules/dependency-cruiser`, a [Dependency Cruiser](https://github.com/sverweij/dependency-cruiser) config for apps-and-packages monorepos.
+It also ships configs for other tools:
+
+| Entry | Tool | Docs |
+| --- | --- | --- |
+| `eslint-plugin-codebase-ai-rules/dependency-cruiser` | [Dependency Cruiser](https://github.com/sverweij/dependency-cruiser) 18.4.0: `layout()`, 16 layout rules for apps-and-packages monorepos | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `eslint-plugin-codebase-ai-rules/tsconfig/strict.json` | TypeScript 7.0.2: strict compiler flags | [tsconfig.md](docs/tsconfig.md) |
+| `eslint-plugin-codebase-ai-rules/tsconfig/effect.json` | TypeScript 7.0.2 with `@effect/tsgo` 0.45.0: `strict.json` plus the Effect language-service diagnostics | [tsconfig.md](docs/tsconfig.md) |
+| `eslint-plugin-codebase-ai-rules/biome` | Biome 2.5.14: formatter and linter rules | [biome.md](docs/biome.md) |
+| `codebase-ai-rules-pins` (bin) | Node: every dependency pinned exactly | [pins.md](docs/pins.md) |
+
+A consumer keeps only what no tool can inherit: project values (scope, token files, excludes), `turbo.json`, `pnpm-workspace.yaml`, the env schema, CI, agent-harness hooks, prose, and tests that check its own wiring.
 
 The package is ESM, except for the CommonJS Dependency Cruiser preset. It runs directly from checked-in source and supports `^20.19.0 || ^22.13.0 || >=24.0.0`, matching the ESLint 10 toolchain used by this repository.
 
@@ -148,7 +160,42 @@ module.exports = require("eslint-plugin-codebase-ai-rules/dependency-cruiser").l
 npx depcruise --config .dependency-cruiser.cjs apps packages
 ```
 
-`layout()` returns the whole config: 13 `forbidden` rules at error level and the `options` block. The rules keep apps and packages apart, keep a package's callers on its `src/index.ts`, keep delivery, server and use-cases layers apart, reject unresolved imports, and keep tests in `tests/` folders under `src/`. `scope` is required. Folder names are options. Append your own rules to the returned `forbidden` array. See [the preset documentation](docs/dependency-cruiser.md) for the options and the full rule list.
+`layout()` returns the whole config: 16 `forbidden` rules at error level and the `options` block. The rules keep apps and packages apart, keep a package's callers on its `src/index.ts`, keep delivery, server and use-cases layers apart, keep app code inside those layers, keep use-cases from importing each other, reject `utils`/`helpers`/`misc` files, reject unresolved imports, and keep tests in `tests/` folders under `src/`. `scope` is required. Folder names are options. Append your own rules to the returned `forbidden` array. See [the preset documentation](docs/dependency-cruiser.md) for the options and the full rule list.
+
+## Configure TypeScript
+
+```json
+// tsconfig.base.json
+{
+  "extends": "eslint-plugin-codebase-ai-rules/tsconfig/effect.json"
+}
+```
+
+Use `tsconfig/strict.json` in a project without Effect. TypeScript resolves both through the package `exports`. The Effect diagnostics need a compiler patched by `@effect/tsgo`. See [tsconfig.md](docs/tsconfig.md).
+
+## Configure Biome
+
+```json
+// biome.json
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+  "extends": ["eslint-plugin-codebase-ai-rules/biome"],
+  "files": {
+    "includes": ["**", "!!node_modules", "!!dist", "!!coverage", "!!generated"]
+  }
+}
+```
+
+`files` stays in the consumer, because Biome replaces an extended `files.includes` list instead of merging it. See [biome.md](docs/biome.md).
+
+## Check exact pins
+
+```json
+// package.json
+{ "scripts": { "pins": "codebase-ai-rules-pins" } }
+```
+
+Without arguments it checks the root `package.json` and every workspace listed in `pnpm-workspace.yaml`, and exits 1 on any range, tag or unpinned Git spec. See [pins.md](docs/pins.md).
 
 ## Overrides
 
@@ -188,7 +235,9 @@ The exception list is closed. It covers syntax-owned directives only when they m
 
 ## Limitations
 
-- This package checks comment discipline, relative Markdown links and design-token use only. It does not replace a project's normal ESLint rules.
+- The ESLint rules check comment discipline, relative Markdown links and design-token use only. They do not replace a project's normal ESLint rules.
+- The TypeScript and Biome presets are tested against TypeScript 7.0.2, `@effect/tsgo` 0.45.0 and Biome 2.5.14. Other versions may reject or ignore options.
+- The pins bin needs Node 22 or newer to read `pnpm-workspace.yaml`. On Node 20, pass manifest paths.
 - The Dependency Cruiser preset expects `<workspace>/src/` folders. Only folder names are options, not the overall shape.
 - It uses ESLint flat config and requires ESLint 9 or newer.
 - The TypeScript parser is supplied by this package, but TypeScript type-aware linting is not enabled.
@@ -201,7 +250,7 @@ The exception list is closed. It covers syntax-owned directives only when they m
 
 1. Review the pinned commit diff and the rule documentation between the current and candidate commit.
 2. Update the Git commit pin in `package.json` and regenerate `package-lock.json` with `npm install`.
-3. Run `npm run check`, `npm run pack:check`, and the consuming project's `npx eslint .`.
+3. Run `npm run check`, `npm run pack:check`, and the consuming project's own checks (ESLint, Biome, typecheck, Dependency Cruiser, pins).
 4. Merge the lockfile and config change together. Do not npm-publish this package.
 
 The repository is private. Access, GitHub Actions, and Git commit history are the distribution boundary.

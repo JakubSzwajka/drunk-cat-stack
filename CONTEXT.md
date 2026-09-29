@@ -1,6 +1,15 @@
 # eslint-plugin-codebase-ai-rules
 
-This repository contains a private GitHub package with six ESLint rules and one Dependency Cruiser preset. It extracts Hosti's comment-discipline rule without changing the rule's semantics, adds a Markdown rule that reports relative links to paths git does not track, adds four design-token rules for CSS and JS/TS, and ships drunk-cat-stack's monorepo layout rules as a reusable Dependency Cruiser config.
+This repository is the one installable home of the operator's house rules and house configs. It is a private GitHub package with six ESLint rules, one Dependency Cruiser preset, two TypeScript presets, one Biome preset and one bin. It extracts Hosti's comment-discipline rule without changing the rule's semantics, adds a Markdown rule that reports relative links to paths git does not track, adds four design-token rules for CSS and JS/TS, ships drunk-cat-stack's monorepo layout rules as a reusable Dependency Cruiser config, and ships drunk-cat-stack's tsconfig, Biome config and exact-pins script.
+
+## Split with consumers
+
+This package owns house rules and house configs. A consumer repository keeps only:
+
+- project values, such as the npm scope, token files and path excludes;
+- files no tool can inherit: `turbo.json`, `pnpm-workspace.yaml`, the env schema, CI, and agent-harness hooks (the `--no-verify` fence and lefthook stay in the consumer on purpose, so the fence never depends on `node_modules`);
+- prose;
+- tests that check its own wiring.
 
 ## Vocabulary
 
@@ -9,8 +18,10 @@ This repository contains a private GitHub package with six ESLint rules and one 
   - `recommended`, exported as `plugin.configs.recommended` from the package root. It runs `comment-discipline` on JS, JSX, MJS, CJS, TS, TSX, MTS, and CTS.
   - `markdown`, the default export of the `eslint-plugin-codebase-ai-rules/markdown` subpath. It runs `no-broken-relative-links` on `**/*.md` through the `@eslint/markdown` GFM language.
   - `design`, the preset returned by the `design(options)` factory, the default and named export of the `eslint-plugin-codebase-ai-rules/design` subpath. It returns a CSS block on the `@eslint/css` `css/css` language running the three CSS design rules, and a source block running `design-no-raw-color-literal` with the same parser setup as `recommended`.
-- **Layout preset**: the Dependency Cruiser config returned by the `layout(options)` factory, the named export of the `eslint-plugin-codebase-ai-rules/dependency-cruiser` subpath. It is not an ESLint preset and not one of the three presets above. It returns a whole Dependency Cruiser config, `forbidden` plus `options`, holding 13 **layout rules**. Layout rules are Dependency Cruiser rules, not ESLint rules, and are not counted among the six.
-- **Consumer**: a repository that installs this package from GitHub and spreads one or more presets in `eslint.config.mjs`.
+- **Layout preset**: the Dependency Cruiser config returned by the `layout(options)` factory, the named export of the `eslint-plugin-codebase-ai-rules/dependency-cruiser` subpath. It is not an ESLint preset and not one of the three presets above. It returns a whole Dependency Cruiser config, `forbidden` plus `options`, holding 16 **layout rules**. Layout rules are Dependency Cruiser rules, not ESLint rules, and are not counted among the six.
+- **Config preset**: a JSON file another tool extends by package specifier. There are three: `tsconfig/strict.json`, `tsconfig/effect.json` (extends `strict.json`, adds the `@effect/language-service` plugin block), and `biome/preset.json`, exported as `eslint-plugin-codebase-ai-rules/biome`. They are not ESLint presets.
+- **Pins bin**: `codebase-ai-rules-pins`, `bin/pins.mjs`. It fails when a dependency in the root or a workspace `package.json` is not an exact version, `workspace:<exact>`, or a Git spec pinned to a full commit.
+- **Consumer**: a repository that installs this package from GitHub and uses one or more of its presets or its bin.
 - **Exception**: one closed, syntax-owned directive or legal header accepted by `comment-discipline`.
 - **Relative link**: a Markdown link, image, or link reference definition whose target has no URI scheme, is not a pure anchor, is not protocol-relative, and contains no `{` placeholder.
 - **Tracked path**: a file listed by `git ls-files` for the repository that holds the linted file, or a parent directory of one. Matching is exact and case-sensitive.
@@ -21,7 +32,7 @@ This repository contains a private GitHub package with six ESLint rules and one 
 
 ## Contract
 
-- Package name and version stay `eslint-plugin-codebase-ai-rules@0.3.0` until an intentional release decision changes them. `package.json` and `plugin.meta.version` carry the same version.
+- Package name and version stay `eslint-plugin-codebase-ai-rules@0.4.0` until an intentional release decision changes them. The name stays although the package now holds more than ESLint rules: five repositories pin it (board-app, hosti, hosti-next16, trippy, drunk-cat-stack), so a rename is deferred. `package.json` and `plugin.meta.version` carry the same version.
 - The package is ESM, runs checked-in `.mjs` source directly (plus the one `.cjs` layout preset), and supports Node `^20.19.0 || ^22.13.0 || >=24.0.0`, matching the checked-in ESLint 10 toolchain.
 - `private: true` stays set. Do not npm-publish.
 - The plugin key is `codebase-ai-rules`.
@@ -30,7 +41,10 @@ This repository contains a private GitHub package with six ESLint rules and one 
 - `@eslint/markdown` is an optional peer dependency and a development dependency. Only `src/markdown.mjs` imports it. The package root must never load it, so `recommended` consumers install nothing new.
 - `@eslint/css` is an optional peer dependency and a development dependency. Only `src/design.mjs` imports it. The package root registers the design rules but must never load it. Token files are read by a small custom-property scanner in `src/design-tokens.mjs`, not by the CSS parser, for that reason.
 - `dependency-cruiser` is an optional peer dependency and an exact development dependency. Only the tests import it. `src/dependency-cruiser.cjs` is the one CommonJS file in `src/`, so a `.dependency-cruiser.cjs` config can `require` it. It requires nothing, so it never loads ESLint, `@eslint/css`, or `@eslint/markdown`.
-- `layout({ scope: "@hosti/" })` equals drunk-cat-stack's `.dependency-cruiser.cjs` exactly. `tests/fixtures/dependency-cruiser/drunk-cat-stack.cjs` is a copy of that file, and a test compares them. When drunk-cat-stack changes its rules, refresh the copy and the preset together.
+- `tests/fixtures/dependency-cruiser/layout-hosti.snapshot.json` is a snapshot of `layout({ scope: "@hosti/" })`, and a test compares them. Refresh it only for an intentional rule change. Rules that concern a file's location (`tests-live-in-tests-dir`, `app-code-in-layers`, `no-ownerless-files`) are module rules with `numberOfDependentsLessThan: 100`, because a dependency rule cannot see a file whose only imports are excluded `node_modules` packages. drunk-cat-stack switches to `layout()` in the next phase.
+- `tsconfig/strict.json` plus `tsconfig/effect.json` equal drunk-cat-stack's `tsconfig.base.json`, and `biome/preset.json` equals its `biome.json` without `files`. Copies live in `tests/fixtures/presets/`, and tests compare them. Biome replaces an extended `files.includes` instead of merging it, so `files` belongs to the consumer.
+- The config presets are tested against TypeScript 7.0.2, `@effect/tsgo` 0.45.0 and Biome 2.5.14. `typescript` 7.0.2 is an exact development dependency under the alias `typescript-7`, because `@typescript-eslint/parser` and Dependency Cruiser need the TypeScript 6 that stays at `node_modules/typescript`. `@biomejs/biome` 2.5.14 is an exact development dependency. Neither is a peer: consumers bring their own.
+- The pins bin is drunk-cat-stack's `scripts/check-exact-pins.mjs` with the same behavior, messages and exit codes. Its workspace mode needs `fs.globSync` (Node 22+); on Node 20 it accepts explicit paths only.
 - Token files are parsed once per process and cached by absolute real path, modification time, and size.
 - Consumer path ignores do not belong in the preset.
 - The `comment-discipline` source and tests are ported from Hosti. Packaging and config are generalized; its semantics are not changed.
@@ -41,13 +55,16 @@ This repository contains a private GitHub package with six ESLint rules and one 
 ## Layout
 
 ```text
-src/      checked-in plugin source
- tests/   unit and exported-preset tests
-docs/     focused rule documentation
+src/        checked-in plugin source and the layout preset
+bin/        the pins bin
+tsconfig/   TypeScript config presets
+biome/      Biome config preset
+tests/      unit, exported-preset, config-preset and bin tests
+docs/       focused rule and preset documentation
 ```
 
 Keep source modules small. Tests should import the package entry point or exercise the exported presets. The pure link-resolution helpers in `src/relative-links.mjs` and `src/repository-paths.mjs`, and the design helpers in `src/colors.mjs`, `src/css-values.mjs`, `src/design-tokens.mjs` and `src/file-globs.mjs`, may also be unit tested directly. Do not add a build step.
 
 ## Verification
 
-Run `npm run check` and `npm run pack:check`. For release or dependency changes, install the package from a fresh fixture using a pinned Git spec and run ESLint against JavaScript, TypeScript, Markdown, and CSS design pass/fail fixtures. The Markdown fixture must be a git repository with its files added to the index.
+Run `npm run check` and `npm run pack:check`. For changes to a config preset, also prove it in a throwaway copy of drunk-cat-stack switched to the presets: `pnpm check` and `pnpm test` pass, and planted violations fail. For release or dependency changes, install the package from a fresh fixture using a pinned Git spec and run ESLint against JavaScript, TypeScript, Markdown, and CSS design pass/fail fixtures. The Markdown fixture must be a git repository with its files added to the index.

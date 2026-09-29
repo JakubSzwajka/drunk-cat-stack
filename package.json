@@ -1,17 +1,23 @@
 {
   "name": "eslint-plugin-codebase-ai-rules",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
-  "description": "Focused ESLint rules for AI-assisted codebases: comment discipline for JS/TS, broken relative links in Markdown, and design-token checks for CSS and JS/TS.",
+  "description": "House rules and house configs for AI-assisted codebases: ESLint rules (comment discipline, broken Markdown links, design tokens), a Dependency Cruiser layout preset, TypeScript and Biome presets, and an exact-pins checker.",
   "license": "MIT",
   "type": "module",
   "files": [
     "src",
+    "bin",
+    "tsconfig",
+    "biome",
     "docs",
     "README.md",
     "CONTEXT.md",
     "LICENSE"
   ],
+  "bin": {
+    "codebase-ai-rules-pins": "bin/pins.mjs"
+  },
   "exports": {
     ".": {
       "import": "./src/index.mjs",
@@ -29,11 +35,14 @@
       "require": "./src/dependency-cruiser.cjs",
       "import": "./src/dependency-cruiser.cjs",
       "default": "./src/dependency-cruiser.cjs"
-    }
+    },
+    "./tsconfig/strict.json": "./tsconfig/strict.json",
+    "./tsconfig/effect.json": "./tsconfig/effect.json",
+    "./biome": "./biome/preset.json"
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "npm test && node --check src/index.mjs && node --check src/markdown.mjs && node --check src/design.mjs && node --check src/dependency-cruiser.cjs && node --check src/comment-discipline.mjs && node --check src/comment-directives.mjs && node --check src/comment-ranges.mjs && node --check src/no-broken-relative-links.mjs && node --check src/relative-links.mjs && node --check src/repository-paths.mjs && node --check src/colors.mjs && node --check src/css-values.mjs && node --check src/design-tokens.mjs && node --check src/file-globs.mjs && node --check src/design-no-raw-color.mjs && node --check src/design-no-raw-color-literal.mjs && node --check src/design-no-unknown-token.mjs && node --check src/design-scale-value.mjs",
+    "check": "npm test && node --check src/index.mjs && node --check src/markdown.mjs && node --check src/design.mjs && node --check src/dependency-cruiser.cjs && node --check bin/pins.mjs && node --check src/comment-discipline.mjs && node --check src/comment-directives.mjs && node --check src/comment-ranges.mjs && node --check src/no-broken-relative-links.mjs && node --check src/relative-links.mjs && node --check src/repository-paths.mjs && node --check src/colors.mjs && node --check src/css-values.mjs && node --check src/design-tokens.mjs && node --check src/file-globs.mjs && node --check src/design-no-raw-color.mjs && node --check src/design-no-raw-color-literal.mjs && node --check src/design-no-unknown-token.mjs && node --check src/design-scale-value.mjs",
     "pack:check": "npm pack --dry-run"
   },
   "engines": {
@@ -60,10 +69,12 @@
     "@typescript-eslint/parser": "^8.70.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.14",
     "@eslint/css": "^2.0.0",
     "@eslint/markdown": "^8.0.3",
     "dependency-cruiser": "18.4.0",
-    "eslint": "^10.11.0"
+    "eslint": "^10.11.0",
+    "typescript-7": "npm:typescript@7.0.2"
   },
   "repository": {
     "type": "git",

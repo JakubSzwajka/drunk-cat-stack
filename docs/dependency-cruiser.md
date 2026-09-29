@@ -2,7 +2,7 @@
 
 Import path: `eslint-plugin-codebase-ai-rules/dependency-cruiser`
 
-This preset is not an ESLint preset. It is a [Dependency Cruiser](https://github.com/sverweij/dependency-cruiser) configuration for a workspace monorepo with apps under `apps/` and packages under `packages/`. The `layout(options)` factory returns a whole config object, `forbidden` rules and `options` together, that a `.dependency-cruiser.cjs` file can export as-is. With the defaults and `scope: "@hosti/"` it returns exactly drunk-cat-stack's hand-written `.dependency-cruiser.cjs`. A test checks that.
+This preset is not an ESLint preset. It is a [Dependency Cruiser](https://github.com/sverweij/dependency-cruiser) configuration for a workspace monorepo with apps under `apps/` and packages under `packages/`. The `layout(options)` factory returns a whole config object, `forbidden` rules and `options` together, that a `.dependency-cruiser.cjs` file can export as-is. `tests/fixtures/dependency-cruiser/layout-hosti.snapshot.json` is a snapshot of `layout({ scope: "@hosti/" })`, and a test compares them. The first 13 rules and the `options` block are drunk-cat-stack's hand-written `.dependency-cruiser.cjs` from before 0.4.0. Version 0.4.0 adds three rules, so drunk-cat-stack no longer equals `layout()` until it switches to `layout()` in the next phase.
 
 ```js
 // .dependency-cruiser.cjs
@@ -26,7 +26,8 @@ npm install --save-dev --save-exact dependency-cruiser@18.4.0
 ```text
 apps/<app>/src/delivery/       delivery layer
 apps/<app>/src/server/         server layer
-apps/<app>/src/use-cases/      use-cases layer
+apps/<app>/src/use-cases/      use-cases layer, one use-case per top-level entry
+apps/<app>/src/main.ts         entry files, the only code directly in src/
 packages/<pkg>/src/index.ts    the one public entry of a package
 packages/<pkg>/src/internal/   private package code
 <workspace>/src/**/tests/*.test.ts   tests, directly inside a tests folder under src/
@@ -46,13 +47,15 @@ Every folder name above is an option. The `src` segment is fixed.
 | `layers.useCases` | `"use-cases"` | Use-cases folder under `<app>/src/`. |
 | `publicEntry` | `"src/index.ts"` | The only file of a package that another workspace may import. |
 | `internalDir` | `"src/internal"` | Private package code that tests may not import. |
+| `appEntryFiles` | `["main.ts", "index.ts"]` | File names that may sit directly in `<app>/src/`. Names, not paths. `[]` allows none. |
+| `ownerlessNames` | `["utils", "helpers", "misc"]` | File and folder names that `no-ownerless-files` rejects. A name matches `utils.ts`, `utils.test.ts`, `utils/`, but not `string-utils.ts` or `utilities.ts`. Must not be empty. |
 | `testsDir` | `"tests"` | Name of the folder every test file must sit in directly, somewhere under `<workspace>/src/`. It also counts as a test path for `production-does-not-import-tests`, next to `test`, `tests`, and `__tests__`. |
 
 Option values are folder names and paths, not regular expressions. The factory escapes them. Each layer root ends in `(?:/|$)`, so `delivery-legacy` is not `delivery`. An unknown option or layer name throws, and so does a path that is empty or starts or ends with `/`.
 
 ## Rules
 
-All 13 rules run at error level.
+All 16 rules run at error level.
 
 | Rule | Reports |
 | --- | --- |
@@ -69,10 +72,13 @@ All 13 rules run at error level.
 | `no-unresolved-imports` | Any import that does not resolve, including a workspace package the importer does not declare. |
 | `tests-live-in-tests-dir` | A `*.test.*` or `*.spec.*` file in a workspace that does not sit directly in a `testsDir` folder under `src/`. A package-root `tests/`, a subfolder of `tests/`, and `unit-tests/` all fail. |
 | `tests-do-not-import-internals` | A test file, or a file in a test folder, importing `packages/<pkg>/src/internal/`. Test through the public entry. |
+| `app-code-in-layers` | A file under `<app>/src/` outside the three layer folders, unless it is an `appEntryFiles` file directly in `src/`. Test files and files in test folders are left to the test rules. |
+| `use-cases-do-not-import-use-cases` | A use-case importing another use-case. A use-case is one top-level entry under `use-cases/`: a file, or a folder with everything in it. Imports inside one entry are fine. Test files are never the importer, and a test path is never the target. |
+| `no-ownerless-files` | A file or folder named after one of `ownerlessNames`, anywhere under `appsDir` or `packagesDir`. Name the file after what it owns instead. |
 
 A deep import that does not resolve fires both `no-unresolved-deep-package-imports` and `no-unresolved-imports`. That is intended: the first names the cause.
 
-`tests-live-in-tests-dir` is a module rule, so it reports the test file itself. A dependency rule would miss a test that imports nothing, or only a `node_modules` package such as `@effect/vitest`, because the excluded `node_modules` leaves such a test with no dependencies to match. Dependency Cruiser has no plain "every module" condition, so the rule uses `numberOfDependentsLessThan: 100`, which every test file meets.
+`tests-live-in-tests-dir`, `app-code-in-layers` and `no-ownerless-files` are module rules, so they report the file itself. A dependency rule would miss a test that imports nothing, or only a `node_modules` package such as `@effect/vitest`, because the excluded `node_modules` leaves such a test with no dependencies to match. Dependency Cruiser has no plain "every module" condition, so the rule uses `numberOfDependentsLessThan: 100`, which every file meets. Module rules see only files Dependency Cruiser parses: JS and TS files. A `utils/` folder that holds only CSS or JSON goes unreported.
 
 ## Dependency Cruiser options
 
