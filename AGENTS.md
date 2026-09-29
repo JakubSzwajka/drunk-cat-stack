@@ -2,6 +2,8 @@
 
 This file is the law for agents and people working in this repo, and in any project made from the drunk-cat-stack template. Read `VISION.md` for why. It does not override this file. Read `CONTEXT.md` for the words this repo uses.
 
+The house rules and the tool configs come from the pinned plugin `eslint-plugin-codebase-ai-rules`. This repo keeps thin configs that extend its presets, the project values such as the `@hosti/` scope, and the files no tool can inherit. Change a house rule in the plugin, not by copying a preset here.
+
 ## Commands
 
 This repo is a pnpm workspace run by Turborepo. Use pnpm, at the version `packageManager` in `package.json` pins. Corepack picks it up: run `corepack enable` once per machine. Do not replace pnpm with npm, Yarn, or Bun, and do not add a second lockfile.
@@ -9,7 +11,7 @@ This repo is a pnpm workspace run by Turborepo. Use pnpm, at the version `packag
 | Command | What it does |
 | --- | --- |
 | `pnpm install --frozen-lockfile` | Install from `pnpm-lock.yaml`. The root `prepare` script then patches `tsc` with the Effect language service (`effect-tsgo patch`) and installs the lefthook pre-commit hook. |
-| `pnpm check` | Exact pins in every workspace `package.json`, environment schema, Biome, ESLint, Dependency Cruiser once at the root, and `typecheck` in each workspace package through Turborepo. |
+| `pnpm check` | Exact pins in every workspace `package.json` (the plugin's `codebase-ai-rules-pins` bin), environment schema, Biome, ESLint, Dependency Cruiser once at the root, and `typecheck` in each workspace package through Turborepo. |
 | `pnpm env:check` | `varlock load`: resolve and validate every variable in `.env.schema`. |
 | `pnpm exec varlock run -- <cmd>` | Run a command with the environment values injected. |
 | `pnpm test` | Node test runner over `tests/**/*.test.mjs`, then `test` (Vitest) in each workspace package through Turborepo. |
@@ -36,7 +38,9 @@ The table under "What is enforced" in `README.md` lists every rule, its tool, an
 ## Layers inside an app
 
 - Delivery and server never import each other.
-- Use-cases import packages. They never import delivery or server.
+- Use-cases import packages. They never import delivery, server, or another use-case. Each top-level file or folder under `use-cases/` is one use-case.
+- App code sits in `src/delivery/`, `src/server/`, or `src/use-cases/`. Only `src/main.ts` and `src/index.ts` sit directly in `src/`.
+- Never name a file or folder `utils`, `helpers`, or `misc`. Name it after what it owns.
 - No import cycles. No deep package imports. Production code never imports tests.
 - A test file sits directly in a `tests/` folder inside the folder it tests, such as `src/use-cases/tests/show-booking.test.ts`. Tests never import any package's `src/internal/`; a package's own tests import its `src/index.ts`.
 
@@ -49,7 +53,7 @@ Before you edit Effect code, read `effect/AGENTS.md` and the docs under `effect/
 - Delivery maps typed errors to responses once, in the handler. Use-cases let them flow.
 - Never run an Effect by hand inside Effect code or tests. No `Effect.run*` and no hand-built runtime. Tests use `it.effect` or `it.layer` from `@effect/vitest`. Only an application entry point runs Effects.
 - Pin all Effect packages together. `effect`, `@effect/vitest`, and any other `@effect/*` runtime package share one exact version, and a bump moves all of them in the same change. `@effect/tsgo` versions separately and must support the pinned TypeScript.
-- Never set an Effect diagnostic in `tsconfig.base.json` below `error` to make a change pass. Fix the code.
+- Never set an Effect diagnostic below `error` to make a change pass, and never override the plugin's Effect preset in `tsconfig.base.json` or a package's `tsconfig.json`. A `plugins` entry there replaces the whole Effect block. Fix the code.
 
 ## Review only
 
@@ -64,7 +68,7 @@ The "Review only" section in `README.md` lists what no tool here checks. A green
 
 ## Pins
 
-Every dependency in the root `package.json` and in each workspace `package.json` is an exact version. A GitHub dependency is pinned to a full 40-character commit SHA. A workspace dependency is `workspace:` plus the exact version, such as `workspace:0.0.0`. `packageManager` names an exact pnpm version. `pnpm-workspace.yaml` sets `saveExact: true` and `saveWorkspaceProtocol: true`, so `pnpm add <pkg>` writes an exact pin, and `pnpm add <workspace package>` writes `workspace:<exact version>`. `pnpm check` fails on `^`, `~`, ranges, tags, branch names, and `workspace:*`. Node is pinned in `.nvmrc`, and CI reads it from there.
+Every dependency in the root `package.json` and in each workspace `package.json` is an exact version. A GitHub dependency is pinned to a full 40-character commit SHA. A workspace dependency is `workspace:` plus the exact version, such as `workspace:0.0.0`. `packageManager` names an exact pnpm version. `pnpm-workspace.yaml` sets `saveExact: true` and `saveWorkspaceProtocol: true`, so `pnpm add <pkg>` writes an exact pin, and `pnpm add <workspace package>` writes `workspace:<exact version>`. `pnpm check` runs the plugin's `codebase-ai-rules-pins` bin, which fails on `^`, `~`, ranges, tags, branch names, and `workspace:*`. Node is pinned in `.nvmrc`, and CI reads it from there.
 
 `pnpm-workspace.yaml` also holds the install policy:
 
@@ -96,7 +100,7 @@ Ask the owner first:
 - adding, removing, or bumping a dependency, the TypeScript version, the Node version, pnpm, or Turborepo;
 - adding an entry to `minimumReleaseAgeExclude`, or setting an `allowBuilds` entry to `true`;
 - removing the TypeScript 6 `packageExtensions` entry for the ESLint plugin, or narrowing the files ESLint checks;
-- any change to `biome.json`, `eslint.config.mjs`, `.dependency-cruiser.cjs`, `tsconfig*.json`, `turbo.json`, `pnpm-workspace.yaml`, `lefthook.yml`, CI, or the hook policy that loosens a rule;
+- inlining a copy of a plugin preset into a thin config, or any change to `biome.json`, `eslint.config.mjs`, `.dependency-cruiser.cjs`, `tsconfig*.json`, `turbo.json`, `pnpm-workspace.yaml`, `lefthook.yml`, CI, or the hook policy that loosens a rule;
 - deleting tests;
 - changing how secrets are handled: `@sensitive`, `.env.local`, the `.gitignore` env lines, or `.varlock/config.json`;
 - changing `VISION.md`;

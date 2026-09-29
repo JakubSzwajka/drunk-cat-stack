@@ -1,8 +1,16 @@
 # Context
 
-This repository, drunk-cat-stack, is a copyable configuration example. It is not a published library, a checker, or a source of product code.
+This repository, drunk-cat-stack, is a template. It is not a published library, a checker, or a source of product code.
 
-The comment rule comes from the external `eslint-plugin-codebase-ai-rules` package, installed from GitHub at a pinned commit. No rule code lives in this repository.
+The **house plugin** is the external `eslint-plugin-codebase-ai-rules` package, installed from GitHub at a pinned commit. It owns the **house rules** and the **presets**: the ESLint rules, the TypeScript and Biome presets, the Dependency Cruiser `layout()` factory, and the `codebase-ai-rules-pins` bin. No rule code and no copy of a preset lives in this repository.
+
+The template holds five things:
+
+1. **Thin configs**: `tsconfig.base.json`, `biome.json`, `.dependency-cruiser.cjs`, and `eslint.config.mjs`. Each points at a preset and sets only **project values**, such as the `@hosti/` scope or Biome's own excludes.
+2. The files no tool can inherit: `turbo.json`, `pnpm-workspace.yaml`, `.env.schema`, CI, `lefthook.yml`, and the agent-harness hooks.
+3. Prose: `AGENTS.md`, `CONTEXT.md`, `README.md`, `VISION.md`, and `skills/`.
+4. Example code: `apps/api` and `packages/bookings`.
+5. **Wiring tests** under `tests/`, which prove the thin configs and the fence are hooked up, not how each rule behaves. The plugin tests its own rules.
 
 The repository is a pnpm **workspace**: one root with one lockfile, plus workspace packages listed in `pnpm-workspace.yaml`. Turborepo runs each workspace package's `typecheck` and `test` scripts in dependency order. A **workspace package** is any folder under `apps/` or `packages/` with its own `package.json`. An **app** is a workspace package under `apps/`. It holds delivery, server, and use-case code, and nothing imports it. A **package** is a workspace package under `packages/`. It holds one module, and apps and other packages import it by its package name.
 

@@ -24,7 +24,7 @@ Then run `pnpm install` so pnpm links the new package and updates `pnpm-lock.yam
 Inside `packages/<name>/src/`:
 
 1. Put the data types and the expected errors in `types.ts`. Each expected error is a `Schema.TaggedError` class, such as `BookingNotFound`. Never fail with a global `Error`.
-2. Put private helpers under `internal/`. Nothing outside the package imports them.
+2. Put private code under `internal/`, in files named after what they own. Nothing outside the package imports them. A file or folder named `utils`, `helpers`, or `misc` fails `no-ownerless-files`.
 3. Put the service in `facade.ts`. Use a `Context.Service` class. Its methods return `Effect.Effect<Success, TypedError>` with no requirements. Give it a static layer, such as `Bookings.fromRecords`.
 4. Write `index.ts` as the one public entry. Name each export. No `export *`.
 
@@ -46,7 +46,7 @@ export class Bookings extends Context.Service<
 }
 ```
 
-The dependency-cruiser rules already cover a new package. `packages-public-entry-only` and `packages-imported-by-name` apply to every folder under `packages/`. If you use a new scope, add it to `PACKAGE_NAMESPACE` in `.dependency-cruiser.cjs`.
+The dependency-cruiser rules already cover a new package. `packages-public-entry-only` and `packages-imported-by-name` apply to every folder under `packages/`. If you use a new scope, change the `scope` option passed to `layout()` in `.dependency-cruiser.cjs`.
 
 ## 3. Compose it in a use-case
 
@@ -58,7 +58,7 @@ pnpm --filter @hosti/api add @hosti/<name>
 
 `saveWorkspaceProtocol: true` and `saveExact: true` in `pnpm-workspace.yaml` make pnpm write `"@hosti/<name>": "workspace:0.0.0"` into the app's `package.json`. Do not name a spec such as `@workspace:0.0.0` on the command line: pnpm then writes `workspace:*`, which the pin check rejects.
 
-Create `apps/<app>/src/use-cases/<action>.ts`. Import the module by its package name, never by a relative path into `packages/`.
+Create `apps/<app>/src/use-cases/<action>.ts`. Import the module by its package name, never by a relative path into `packages/`. Do not import another use-case: `use-cases-do-not-import-use-cases` fails it. Move shared logic into the package.
 
 Write the use-case with `Effect.fn("<action>")`. Yield the service and its methods. Let typed errors flow through the error channel. Do not catch them here.
 
@@ -87,9 +87,9 @@ pnpm test
 
 | Check | What it proves |
 | --- | --- |
-| `pnpm run pins` | Every `package.json` in the workspace pins exact versions, including `workspace:0.0.0`. |
+| `pnpm run pins` | Every `package.json` in the workspace pins exact versions, including `workspace:0.0.0`. The plugin's `codebase-ai-rules-pins` bin runs the check. |
 | `pnpm run typecheck` | Effect diagnostics in every workspace package: no floating Effects, no global `Error` in the failure channel, no `Effect.run*` inside Effect code, no leaked requirements. |
-| `pnpm run deps` | Packages do not import apps, apps import packages only by name and only through `src/index.ts`, use-cases do not import delivery or server. |
+| `pnpm run deps` | Packages do not import apps, apps import packages only by name and only through `src/index.ts`, use-cases do not import delivery, server, or each other, app code sits in a layer, and no file is named `utils`, `helpers`, or `misc`. |
 | `pnpm run lint` | No comments that restate the code. |
 | `pnpm run biome` | Named barrel exports and file names. |
 | `pnpm test` | The package, use-case, and delivery tests pass under Vitest in each workspace package. |

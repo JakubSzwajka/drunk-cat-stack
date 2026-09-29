@@ -1,6 +1,6 @@
 # Hosti-shaped before
 
-These snippets are documentation, not failing fixtures. Each one is a concrete shape rejected by the copied configuration.
+These snippets are documentation, not failing fixtures. Each one is a concrete shape that the thin configs reject, through the presets of the house plugin they extend.
 
 ```ts
 // apps/api/src/server/start-server.ts: an outer server layer imports delivery
@@ -22,6 +22,21 @@ import { Bookings } from "../../../../packages/bookings/src/index.js";
 ```ts
 // packages/bookings/src/facade.ts: a package imports an app
 import { showBooking } from "../../../apps/api/src/use-cases/show-booking.js";
+```
+
+```ts
+// apps/api/src/format-booking.ts: app code outside delivery, server, and use-cases
+export const formatBooking = (id: string) => `booking ${id}`;
+```
+
+```ts
+// packages/bookings/src/internal/utils.ts: a file named after no owner
+export const byId = (id: string) => (booking: { id: string }) => booking.id === id;
+```
+
+```ts
+// apps/api/src/use-cases/cancel-booking.ts: one use-case imports another
+import { showBooking } from "./show-booking.js";
 ```
 
 ```jsonc
@@ -66,4 +81,4 @@ export function getBooking(bookings: readonly Booking[], id: string): Booking | 
 }
 ```
 
-The passing counterpart is the workspace itself: [`packages/bookings`](../../packages/bookings) and [`apps/api`](../../apps/api). It removes the server-to-delivery import, imports `@hosti/bookings` by name, keeps `exports` to `src/index.ts`, keeps the package free of app imports, fails with a typed `BookingNotFound` instead of a global `Error`, yields Effects instead of running them by hand, names exports in the barrel, uses `BookingCard.tsx` for `BookingCard`, and drops comments that restate the code. `pnpm run typecheck` rejects the Effect snippet through the `globalErrorInEffectFailure` and `runEffectInsideEffect` diagnostics. `pnpm run deps` rejects the relative import with `packages-imported-by-name`, the package-to-app import with `packages-do-not-import-apps`, and a deep import through the widened `exports` with `packages-public-entry-only`.
+The passing counterpart is the workspace itself: [`packages/bookings`](../../packages/bookings) and [`apps/api`](../../apps/api). It removes the server-to-delivery import, imports `@hosti/bookings` by name, keeps `exports` to `src/index.ts`, keeps the package free of app imports, fails with a typed `BookingNotFound` instead of a global `Error`, yields Effects instead of running them by hand, names exports in the barrel, uses `BookingCard.tsx` for `BookingCard`, and drops comments that restate the code. `pnpm run typecheck` rejects the Effect snippet through the `globalErrorInEffectFailure` and `runEffectInsideEffect` diagnostics. `pnpm run deps` rejects the relative import with `packages-imported-by-name`, the package-to-app import with `packages-do-not-import-apps`, a deep import through the widened `exports` with `packages-public-entry-only`, the stray app file with `app-code-in-layers`, `utils.ts` with `no-ownerless-files`, and the use-case import with `use-cases-do-not-import-use-cases`.

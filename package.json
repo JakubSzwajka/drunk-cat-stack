@@ -2,7 +2,7 @@
   "name": "drunk-cat-stack",
   "version": "0.0.0",
   "private": true,
-  "description": "Copyable maintained-tool configuration for deterministic code-structure rules",
+  "description": "Monorepo template with thin configs over eslint-plugin-codebase-ai-rules for deterministic code-structure rules",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -13,7 +13,7 @@
   "scripts": {
     "format": "biome format --write .",
     "fix": "biome check --write .",
-    "pins": "node scripts/check-exact-pins.mjs",
+    "pins": "codebase-ai-rules-pins",
     "env:check": "varlock load",
     "biome": "biome check .",
     "lint": "eslint .",
@@ -32,7 +32,7 @@
     "@swc/core": "1.16.2",
     "dependency-cruiser": "18.4.0",
     "eslint": "10.11.0",
-    "eslint-plugin-codebase-ai-rules": "github:JakubSzwajka/eslint-plugin-codebase-ai-rules#1186ed5ab186cdece6ab5cef65b90db511eab2ff",
+    "eslint-plugin-codebase-ai-rules": "github:JakubSzwajka/eslint-plugin-codebase-ai-rules#503da697018b2a4e0c821cd7500f02a30418f864",
     "lefthook": "2.1.14",
     "turbo": "2.11.2",
     "typescript": "7.0.2",

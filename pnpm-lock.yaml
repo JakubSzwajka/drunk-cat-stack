@@ -187,8 +187,8 @@ importers:
         specifier: 10.11.0
         version: 10.11.0(supports-color@7.2.0)
       eslint-plugin-codebase-ai-rules:
-        specifier: github:JakubSzwajka/eslint-plugin-codebase-ai-rules#1186ed5ab186cdece6ab5cef65b90db511eab2ff
-        version: https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/1186ed5ab186cdece6ab5cef65b90db511eab2ff(@eslint/markdown@8.0.3(supports-color@7.2.0))(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)
+        specifier: github:JakubSzwajka/eslint-plugin-codebase-ai-rules#503da697018b2a4e0c821cd7500f02a30418f864
+        version: https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/503da697018b2a4e0c821cd7500f02a30418f864(@eslint/markdown@8.0.3(supports-color@7.2.0))(dependency-cruiser@18.4.0)(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)
       lefthook:
         specifier: 2.1.14
         version: 2.1.14
@@ -996,15 +996,22 @@ packages:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
-  eslint-plugin-codebase-ai-rules@https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/1186ed5ab186cdece6ab5cef65b90db511eab2ff:
-    resolution: {gitHosted: true, integrity: sha512-kEYCykELaECZpyZo7IW8duEL466g1te7ksf4gq3VfOPcVG0WKR6eWs/7ZD9iNOF7la3xEldTYK/i2tKezgvN3Q==, tarball: https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/1186ed5ab186cdece6ab5cef65b90db511eab2ff}
-    version: 0.2.0
+  eslint-plugin-codebase-ai-rules@https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/503da697018b2a4e0c821cd7500f02a30418f864:
+    resolution: {gitHosted: true, integrity: sha512-+WnIfW5/1pxAumViSuZOmFaMG/vYqU2sYI297l7uELmPIgdJta0ECTMCBPQN57qmejAePapIOfddAtRbkcEwtQ==, tarball: https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/503da697018b2a4e0c821cd7500f02a30418f864}
+    version: 0.4.0
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
+    hasBin: true
     peerDependencies:
+      '@eslint/css': ^2.0.0
       '@eslint/markdown': ^8.0.3
+      dependency-cruiser: ^18.4.0
       eslint: '>=9'
     peerDependenciesMeta:
+      '@eslint/css':
+        optional: true
       '@eslint/markdown':
+        optional: true
+      dependency-cruiser:
         optional: true
 
   eslint-scope@9.1.2:
@@ -2371,13 +2378,14 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  eslint-plugin-codebase-ai-rules@https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/1186ed5ab186cdece6ab5cef65b90db511eab2ff(@eslint/markdown@8.0.3(supports-color@7.2.0))(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0):
+  eslint-plugin-codebase-ai-rules@https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/503da697018b2a4e0c821cd7500f02a30418f864(@eslint/markdown@8.0.3(supports-color@7.2.0))(dependency-cruiser@18.4.0)(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
       '@typescript-eslint/parser': 8.70.1(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint: 10.11.0(supports-color@7.2.0)
       typescript: 6.0.3
     optionalDependencies:
       '@eslint/markdown': 8.0.3(supports-color@7.2.0)
+      dependency-cruiser: 18.4.0
     transitivePeerDependencies:
       - supports-color
 
