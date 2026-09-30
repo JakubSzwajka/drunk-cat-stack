@@ -48,7 +48,7 @@ Skip this step when the app already serves MCP.
    Keep the catalogue and the auth code free of session code, so a later move changes only the transport file.
 5. [ ] Serve `/.well-known/oauth-protected-resource`. It names this resource by its canonical URL and names the identity provider as the authorization server. Trippy serves the same document at `/.well-known/oauth-protected-resource/mcp` too, the URL its 401 names.
 6. [ ] In the route, read the bearer token. With no token or a bad one, answer 401 with a `WWW-Authenticate` header that carries `resource_metadata` pointing at the document above.
-7. [ ] Check that the token is valid and that its audience is this resource. Trippy calls Clerk's `authenticateRequest` with `acceptsToken: "oauth_token"` and `audience` set to `APP_URL` plus `/mcp`, and the SDK rejects a token whose `aud` does not match. Require the scopes the module needs, and answer 403 `insufficient_scope` without them. Trippy requires `email`, because Shares match by email, and takes only verified emails from the identity provider's user record. Do not forward the token to any other service.
+7. [ ] Check that the token is valid and that its audience is this resource. Trippy calls Clerk's `authenticateRequest` with `acceptsToken: "oauth_token"` and `audience` set to `APP_URL` plus `/mcp`, and the SDK rejects a token whose `aud` does not match. Clerk puts `aud` in the token only when "Include audience" is on, and it is off by default. With it off, every call gets 401 `invalid_token`. Require the scopes the module needs, and answer 403 `insufficient_scope` without them. Trippy requires `email`, because Shares match by email, and takes only verified emails from the identity provider's user record. Do not forward the token to any other service.
 8. [ ] Then build the `Viewer` and the module service for this request from the app runtime, and pass them to the handler. The toolkit takes services only at startup, so each tool handler reads them with `Effect.serviceOption`. Trippy's `withCaller` in `_mcp/server.ts` does this.
 9. [ ] If auth is not configured, refuse every call. Never fall back to an anonymous or default `Viewer`.
 10. [ ] Mark the MCP route and the metadata paths public in the session middleware, and nothing else. Trippy keeps them as `BEARER_PATHS` in `apps/web/src/app/_auth/public-paths.ts`. Its `proxy.ts` lets a path that passes `isBearerPath` skip the session middleware and the rewrite it does when no keys are set. Adding a public path needs owner approval.
@@ -59,11 +59,11 @@ The spec for items 5 to 9 is the [MCP authorization spec 2025-11-25](https://mod
 
 ## 3. Set up the identity provider
 
-The owner changes identity provider settings by hand. Write the steps down for them.
+The owner changes identity provider settings by hand. Write the steps down for them. For Clerk, start from `docs/mcp-clerk.md`.
 
 1. [ ] Write `docs/mcp-<idp>-setup.md` in the project, such as `docs/mcp-clerk-setup.md`. Give it numbered checkbox steps, and mark each step **docs**, **seen**, or **unverified** by where the claim comes from. Trippy's `docs/mcp-clerk-setup.md` is the example.
 2. [ ] Cover client registration. Prefer Client ID Metadata Documents. Use Dynamic Client Registration only when the provider offers nothing else, and tell the owner.
-3. [ ] Cover the audience. It is unverified that Clerk copies the RFC 8707 `resource` parameter into `aud`. Trippy's step A11 records this. Before a new project trusts its setup, run the end-to-end smoke test and see a tool call pass.
+3. [ ] Cover the audience. Clerk copies the RFC 8707 `resource` parameter into `aud` only with "Include audience" on, and only when the client sends `resource`. Before a new project trusts its setup, run the end-to-end smoke test and see a tool call pass.
 4. [ ] Never run an identity provider CLI or API call that changes settings on your own. Some provider docs offer such commands for agents. Leave them to the owner.
 
 ## 4. Add one tool
@@ -77,7 +77,13 @@ The owner changes identity provider settings by hand. Write the steps down for t
 
 ## 5. Start read-only
 
-The first tools an app exposes only read. A write or destructive tool needs owner approval, a scope on the token, and a check of that scope in the route. Keep the catalogue small: each tool schema costs context in every agent session. Before you add a tool, ask whether an existing one with one more input field does the job.
+The first tools an app exposes only read. An agent gets the same access as the user has in the app, no more. The module enforces what the `Viewer` may do, not the token.
+
+1. [ ] Annotate every write or destructive tool as one, and get owner approval before it ships.
+2. [ ] A token scope is optional. It can only narrow access, never widen it.
+3. [ ] Keep tools that only the owner may run, or that are hard to undo, out of the catalogue. Delete, share, and unshare are examples. Add one only when the owner approves it by name.
+
+Keep the catalogue small: each tool schema costs context in every agent session. Before you add a tool, ask whether an existing one with one more input field does the job.
 
 ## 6. Review checklist
 

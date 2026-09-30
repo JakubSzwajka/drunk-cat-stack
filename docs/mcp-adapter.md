@@ -1,6 +1,6 @@
 # MCP adapter
 
-Status: accepted. The reference implementation is Trippy, which serves a read-only MCP server with three tools. A full OAuth sign-in with a real client is not checked there yet.
+Status: accepted. The reference implementation is Trippy, which serves a read-only MCP server with three tools. Claude Code signed in there end to end over OAuth on 30 Sep 2026.
 
 ## Context
 
@@ -26,7 +26,9 @@ Each way in is an adapter. An adapter decides who the `Viewer` is, runs a use-ca
 
 The MCP adapter has a tool catalogue in the app's delivery layer. A tool is data: a name, a description, an input `Schema`, a read-only or destructive annotation, and a handler that runs an existing use-case. Handlers never touch a module or the database. A CLI adapter would read the same catalogue.
 
-The first tools are read-only. Tools return structured data, not prose, and the catalogue stays small, because every tool schema costs context in each agent session. Earendil's [case for MCP in Pi](https://earendil.com/posts/you-said-no-mcp/) asks for the same: tools that return structured data and are found by their description.
+The first tools are read-only. An agent gets the same access as the user has in the app. The module enforces what the `Viewer` may do, not the token, so an agent never gets more than the user has. Every write or destructive tool is annotated as one and needs owner approval before it ships. A token scope is optional and only narrows access. Tools that only the owner may run, or that are hard to undo, such as delete, share, and unshare, stay out of the catalogue until the owner approves each one by name.
+
+Tools return structured data, not prose, and the catalogue stays small, because every tool schema costs context in each agent session. Earendil's [case for MCP in Pi](https://earendil.com/posts/you-said-no-mcp/) asks for the same: tools that return structured data and are found by their description.
 
 A remote MCP server is an OAuth resource server under the [MCP authorization spec 2025-11-25](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization). The app's identity provider, Clerk in Trippy, is the authorization server. The app:
 
@@ -49,7 +51,7 @@ The MCP code uses `McpServer`, `Tool`, and `Toolkit` from `effect/unstable/ai`, 
 - Effect's HTTP transport keeps each MCP session in process memory. For the protocol versions clients speak today (2025-03-26 to 2025-11-25) it needs an `Mcp-Session-Id`. A fully stateless mode exists only in the draft 2026-07-28 protocol. So an app runs one replica or routes each client to the same one. A restart gives clients 404, and they start a new session.
 - A session holds no user data. The route checks the bearer on every request. Sessions never expire, a small memory leak, because Effect has no public expiry. The catalogue and the auth code know nothing of sessions, so a later move changes only the transport file.
 - MCP works on one host, the canonical URL. The metadata and the token audience both name it.
-- It is unverified that Clerk copies the RFC 8707 `resource` parameter into the token's `aud`. A new project runs its end-to-end smoke test before it trusts the setup.
+- Clerk copies the RFC 8707 `resource` parameter into the token's `aud` only when "Include audience" is on, and it is off by default. `docs/mcp-clerk.md` lists the settings. A new project runs its end-to-end smoke test before it trusts the setup.
 - Rules in `AGENTS.md` describe the pattern. No tool checks them yet, so they are review rules.
 
 ## Rejected
@@ -61,7 +63,7 @@ The MCP code uses `McpServer`, `Tool`, and `Toolkit` from `effect/unstable/ai`, 
 
 ## Later
 
-- Write tools, and the scopes that gate them.
+- Write tools, each approved by the owner by name.
 - MCP Events. The spec is a draft, and ChatGPT supports only webhook delivery.
 - A CLI adapter over the same catalogue.
 - A catalogue package, once a second app needs the tools. Apps cannot import apps, so the use-cases move into that package with it.

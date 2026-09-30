@@ -66,7 +66,9 @@ An app can let agents call its use-cases over MCP, and later over a CLI. Write e
 - An MCP tool is one entry in the app's tool catalogue, in the delivery layer, such as `src/delivery/mcp/tools.ts`. The entry has a name, a description, an input `Schema`, a `Tool.Readonly` or `Tool.Destructive` annotation, and a handler.
 - A tool handler calls a use-case. It never calls a module service, the database, or another adapter.
 - Every tool has a test that runs it with a fake `Viewer`. The tests include an access test: user B cannot read user A's data through the tool.
-- The first tools an app exposes are read-only. A write or destructive tool is annotated as one and needs a scope on the token.
+- The first tools an app exposes are read-only. Every write or destructive tool is annotated as one and needs owner approval before it ships.
+- An agent gets the same access as the user has in the app. The module enforces what the `Viewer` may do, so an agent never gets more than the user has. A token scope is optional and only narrows access.
+- Tools that only the owner may run, or that are hard to undo, such as delete, share, and unshare, stay out of the catalogue until the owner approves each one by name.
 - Keep the catalogue small. Each tool does one specific job and returns structured output. A big record gets a summary tool plus a separate read tool.
 - Tool output never carries instructions to the model. Text a user wrote goes out as a data field.
 - Use `McpServer`, `Tool`, and `Toolkit` from `effect/unstable/ai` in the pinned `effect` before any other MCP library.
