@@ -178,8 +178,8 @@ importers:
         specifier: 8.0.3
         version: 8.0.3(supports-color@7.2.0)
       '@jakubszwajka/house-rules':
-        specifier: github:JakubSzwajka/eslint-plugin-codebase-ai-rules#a4859a94726fc3f1de502569822f0faf79ef18e8
-        version: https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/a4859a94726fc3f1de502569822f0faf79ef18e8(@eslint/markdown@8.0.3(supports-color@7.2.0))(dependency-cruiser@18.4.0)(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)
+        specifier: github:JakubSzwajka/house-rules#ea83c2654485eb0088a57c48e93602d6debfe897
+        version: https://codeload.github.com/JakubSzwajka/house-rules/tar.gz/ea83c2654485eb0088a57c48e93602d6debfe897(@eslint/markdown@8.0.3(supports-color@7.2.0))(dependency-cruiser@18.4.0)(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)
       '@swc/core':
         specifier: 1.16.2
         version: 1.16.2
@@ -401,8 +401,8 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
-  '@jakubszwajka/house-rules@https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/a4859a94726fc3f1de502569822f0faf79ef18e8':
-    resolution: {gitHosted: true, integrity: sha512-t9AIeFvmyB6d5QeR5boqfvvRZGKLlz+/1mLAAxSw0l4OQkXl6QkF+6VYuwVyeMzBToUEayOGHgLR6ytOl3JpWg==, tarball: https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/a4859a94726fc3f1de502569822f0faf79ef18e8}
+  '@jakubszwajka/house-rules@https://codeload.github.com/JakubSzwajka/house-rules/tar.gz/ea83c2654485eb0088a57c48e93602d6debfe897':
+    resolution: {gitHosted: true, integrity: sha512-jI+dDzYfyLHvZgfmVc1FOmVsvEb1+Sgu0JKV0r8xdAwh6Ecmr97EdWoD/fozkYNMQ3z6l7ESB3V/z54XwQlcnA==, tarball: https://codeload.github.com/JakubSzwajka/house-rules/tar.gz/ea83c2654485eb0088a57c48e93602d6debfe897}
     version: 0.5.0
     engines: {node: '>=24.21.0'}
     hasBin: true
@@ -1942,7 +1942,7 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
-  '@jakubszwajka/house-rules@https://codeload.github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules/tar.gz/a4859a94726fc3f1de502569822f0faf79ef18e8(@eslint/markdown@8.0.3(supports-color@7.2.0))(dependency-cruiser@18.4.0)(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)':
+  '@jakubszwajka/house-rules@https://codeload.github.com/JakubSzwajka/house-rules/tar.gz/ea83c2654485eb0088a57c48e93602d6debfe897(@eslint/markdown@8.0.3(supports-color@7.2.0))(dependency-cruiser@18.4.0)(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)':
     dependencies:
       '@typescript-eslint/parser': 8.70.1(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint: 10.11.0(supports-color@7.2.0)

@@ -1,8 +1,8 @@
 # house-rules-stack
 
-house-rules-stack is a TypeScript monorepo template. It shows [`@jakubszwajka/house-rules`](https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules) wired into a real [pnpm](https://pnpm.io) workspace run by [Turborepo](https://turborepo.com), with example code in [Effect 4](https://effect.website). It also holds the prose rules I want in every project, the ones no tool can check.
+house-rules-stack is a TypeScript monorepo template. It shows [`@jakubszwajka/house-rules`](https://github.com/JakubSzwajka/house-rules) wired into a real [pnpm](https://pnpm.io) workspace run by [Turborepo](https://turborepo.com), with example code in [Effect 4](https://effect.website). It also holds the prose rules I want in every project, the ones no tool can check.
 
-Every lint rule, preset, and check in `pnpm check` comes from house-rules for deterministic feedback, and [its README lists them](https://github.com/JakubSzwajka/eslint-plugin-codebase-ai-rules#rules-and-checks).
+Every lint rule, preset, and check in `pnpm check` comes from house-rules for deterministic feedback, and [its README lists them](https://github.com/JakubSzwajka/house-rules#rules-and-checks).
 
 It is a GitHub template. Create a repo from it with `gh repo create <name> --template JakubSzwajka/house-rules-stack`. It also carries the reference copy of the release workflow. See [`docs/release.md`](docs/release.md) to adopt it.
 
