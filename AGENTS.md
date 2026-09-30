@@ -55,6 +55,29 @@ Before you edit Effect code, read `effect/AGENTS.md` and the docs under `effect/
 - Pin all Effect packages together. `effect`, `@effect/vitest`, and any other `@effect/*` runtime package share one exact version, and a bump moves all of them in the same change. `@effect/tsgo` versions separately and must support the pinned TypeScript.
 - Never set an Effect diagnostic below `error` to make a change pass, and never override the plugin's Effect preset in `tsconfig.base.json` or a package's `tsconfig.json`. A `plugins` entry there replaces the whole Effect block. Fix the code.
 
+## Agent adapters (MCP and CLI)
+
+An app can let agents call its use-cases over MCP, and later over a CLI. Write each capability once, in a module and a use-case, and let each adapter reach it. `docs/mcp-adapter.md` records why. To add a tool, follow `skills/add-an-mcp-tool/SKILL.md`.
+
+- A service method that acts for a user takes that user as an explicit `Actor` argument. Access rules live inside the module, so no adapter can skip them.
+- A use-case that acts for a user yields the `Viewer` service, which holds the `Actor`, and passes it to the module. `Viewer` lives in a package, because more than one use-case needs it.
+- An adapter decides who the `Viewer` is, runs one use-case, and maps its typed errors to its own response. It holds no business logic and no access rule.
+- Each adapter owns its error mapper. The MCP adapter does not reuse the web error view.
+- An MCP tool is one entry in the app's tool catalogue, in the delivery layer, such as `src/delivery/mcp/tools.ts`. The entry has a name, a description, an input `Schema`, a `Tool.Readonly` or `Tool.Destructive` annotation, and a handler.
+- A tool handler calls a use-case. It never calls a module service, the database, or another adapter.
+- Every tool has a test that runs it with a fake `Viewer`. The tests include an access test: user B cannot read user A's data through the tool.
+- The first tools an app exposes are read-only. A write or destructive tool is annotated as one and needs a scope on the token.
+- Keep the catalogue small. Each tool does one specific job and returns structured output. A big record gets a summary tool plus a separate read tool.
+- Tool output never carries instructions to the model. Text a user wrote goes out as a data field.
+- Use `McpServer`, `Tool`, and `Toolkit` from `effect/unstable/ai` in the pinned `effect` before any other MCP library.
+- A remote MCP endpoint is an OAuth resource server under the [MCP authorization spec 2025-11-25](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization). It answers a call with no valid token with 401 and a `WWW-Authenticate` header that names `resource_metadata`. It serves `/.well-known/oauth-protected-resource`, naming the authorization server.
+- The MCP route checks that the token is valid and was issued for this resource (its audience, RFC 8707) before it builds the `Viewer`. It never passes the token on to another service.
+- The identity provider is the authorization server. Prefer Client ID Metadata Documents to Dynamic Client Registration.
+- When auth is not configured, the MCP routes refuse every call. They fail closed.
+- The session middleware treats the MCP route and the metadata paths as public. The MCP route does its own bearer check.
+- The app's canonical public URL is an environment variable declared in `.env.schema`.
+- Tests cover the 401 challenge, the metadata document, and the fail-closed path.
+
 ## Prose rules
 
 The "Prose rules" section in `README.md` lists what no tool here checks. A green `pnpm check` says nothing about those. Point them out in review instead of claiming a check covers them.
@@ -93,10 +116,14 @@ Safe without asking:
 - new or tighter tests;
 - docs edits in `README.md`, `AGENTS.md`, and `CONTEXT.md`;
 - tightening a lint or dependency rule;
-- adding a variable to `.env.schema`.
+- adding a variable to `.env.schema`;
+- adding a read-only MCP tool that calls an existing use-case, with its test.
 
 Ask the owner first:
 
+- adding any MCP or OAuth dependency;
+- exposing a write or destructive MCP tool, or adding a token scope;
+- making another path public in the session middleware;
 - adding, removing, or bumping a dependency, the TypeScript version, the Node version, pnpm, or Turborepo;
 - adding an entry to `minimumReleaseAgeExclude`, or setting an `allowBuilds` entry to `true`;
 - removing the TypeScript 6 `packageExtensions` entry for the ESLint plugin, or narrowing the files ESLint checks;

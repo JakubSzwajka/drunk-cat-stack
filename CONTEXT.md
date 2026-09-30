@@ -20,6 +20,10 @@ The checked example puts the bookings module in `packages/bookings`, named `@hos
 
 In the example, a module's interface is an Effect **service**: a `Context.Service` class, such as `Bookings`, whose methods return Effects. An **expected error** is a `Schema.TaggedError` class, such as `BookingNotFound`, carried in the Effect error channel. A **layer** in Effect code means an Effect `Layer` that provides a service. It is not a delivery, server, or use-case layer of an app.
 
+An **Actor** is the user a call acts for. A service method that acts for a user takes the Actor as an explicit argument, and checks access itself. The **Viewer** is the Effect service that holds the Actor for one request. A use-case yields the Viewer, so it never learns how the user signed in. The bookings example has no Actor yet. Trippy, a project made from this template, has both in `packages/trips`.
+
+An **adapter** is delivery code that lets one kind of caller reach the use-cases. It decides who the Viewer is, runs a use-case, and maps its typed errors to its own response. A web page behind a cookie session is one adapter. An MCP server is another, and a CLI would be a third. An MCP **tool** is one action an agent can call: a name, a description, an input schema, an annotation that says whether it only reads, and a handler that runs one use-case. The **tool catalogue** is the list of tools in one app's delivery layer. A **resource server** checks OAuth tokens that an outside authorization server issued, and never issues them itself. A remote MCP server is one.
+
 The **agent sources** are shallow clones of dependency source under `.agent_sources/`, made by `pnpm vendor:agent-sources`. Agents read them. Nothing imports them.
 
 The **fence** is what stops an agent from skipping the checks: exact pins, `pnpm check`, `pnpm test`, the lefthook pre-commit hook, and the harness hooks that block `git ... --no-verify`. Its code lives in `scripts/` and `.pi/extensions/`. **Law** is `AGENTS.md`. **Vision** is `VISION.md`, and each project made from the template writes its own.

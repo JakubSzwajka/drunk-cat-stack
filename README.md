@@ -125,6 +125,10 @@ Start from the template, or copy these into an existing pnpm workspace:
 
 Follow [`skills/add-an-effect-module/SKILL.md`](skills/add-an-effect-module/SKILL.md). In short: copy `packages/bookings`, keep `exports` to `"." : "./src/index.ts"`, keep private code in `src/internal/`, and run `pnpm install`.
 
+### Let agents call a use-case
+
+Follow `skills/add-an-mcp-tool/SKILL.md`. `docs/mcp-adapter.md` records why an MCP tool only runs an existing use-case.
+
 ## Example
 
 [`examples/hosti-before`](examples/hosti-before/README.md) holds code that fails the checks, as Markdown snippets so this repo stays green.
