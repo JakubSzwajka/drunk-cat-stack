@@ -12,6 +12,7 @@ It is a GitHub template. Create a repo from it with `gh repo create <name> --tem
 .
 ├── apps/api/               @hosti/api: delivery, server, use-cases
 ├── packages/bookings/      @hosti/bookings: one Effect module, src/index.ts is its only export
+├── packages/capability/    @house-rules/capability: capability contracts and handlers
 ├── packages/rules/         @house-rules/rules: the house rules, presets, and pins bin
 ├── tests/                  fence and thin-config wiring tests
 ├── .dependency-cruiser.cjs layout({ scope: "@hosti/" }) from house-rules
@@ -71,7 +72,7 @@ These are what a reviewer checks. A green `pnpm check` says nothing about them.
 - Tests use `it.effect` or `it.layer`, never `Effect.run*`, even outside Effect code.
 - Every Effect package shares one version across the workspace.
 - A cast has a stated intent.
-- Folders are named after what they own. Seams sit where callers need them. A new capability that stands alone gets its own package.
+- Folders are named after what they own. Seams sit where callers need them. A new module that stands alone gets its own package.
 - A module's own tests use only its public entry, not a file beside it.
 - A frontend library solves a named pain.
 - React code follows React semantics, not only the filename rule.
@@ -153,6 +154,20 @@ The package used to be called `@jakubszwajka/house-rules`. Version 0.5.0 is the 
 4. [ ] Run `pnpm install`, then your checks.
 
 An old pin keeps working until you move it. The old commits are in this repo's history, so a pin to one of them still resolves.
+
+### Using capabilities in another app
+
+[`@house-rules/capability`](packages/capability/README.md) defines a capability: one named action with a contract and one handler. An app installs it the same way, with its own subpath, and pins `effect` to the version the package names:
+
+```json
+{
+  "dependencies": {
+    "@house-rules/capability": "github:JakubSzwajka/house-rules#<full-40-char-sha>&path:/packages/capability"
+  }
+}
+```
+
+Its README lists the install steps and what v0 does not do yet.
 
 ### Add an app
 
