@@ -1,10 +1,10 @@
-# house-rules-stack
+# house-rules
 
-house-rules-stack is a TypeScript monorepo template. It holds [`@jakubszwajka/house-rules`](packages/rules/README.md) in `packages/rules` and shows it wired into a real [pnpm](https://pnpm.io) workspace run by [Turborepo](https://turborepo.com), with example code in [Effect 4](https://effect.website). It also holds the prose rules I want in every project, the ones no tool can check.
+house-rules is the home of the house plugin and of a TypeScript monorepo template, the stack. The stack holds [`@house-rules/rules`](packages/rules/README.md) in `packages/rules` and shows it wired into a real [pnpm](https://pnpm.io) workspace run by [Turborepo](https://turborepo.com), with example code in [Effect 4](https://effect.website). It also holds the prose rules I want in every project, the ones no tool can check.
 
-Every lint rule, preset, and check in `pnpm check` comes from house-rules for deterministic feedback, and [its README lists them](packages/rules/README.md#rules-and-checks).
+Every lint rule, preset, and check in `pnpm check` comes from the house plugin for deterministic feedback, and [its README lists them](packages/rules/README.md#rules-and-checks).
 
-It is a GitHub template. Create a repo from it with `gh repo create <name> --template JakubSzwajka/house-rules-stack`. It also carries the reference copy of the release workflow. See [`docs/release.md`](docs/release.md) to adopt it.
+It is a GitHub template. Create a repo from it with `gh repo create <name> --template JakubSzwajka/house-rules`. It also carries the reference copy of the release workflow. See [`docs/release.md`](docs/release.md) to adopt it.
 
 ## Layout
 
@@ -12,7 +12,7 @@ It is a GitHub template. Create a repo from it with `gh repo create <name> --tem
 .
 ├── apps/api/               @hosti/api: delivery, server, use-cases
 ├── packages/bookings/      @hosti/bookings: one Effect module, src/index.ts is its only export
-├── packages/rules/         @jakubszwajka/house-rules: the house rules, presets, and pins bin
+├── packages/rules/         @house-rules/rules: the house rules, presets, and pins bin
 ├── tests/                  fence and thin-config wiring tests
 ├── .dependency-cruiser.cjs layout({ scope: "@hosti/" }) from house-rules
 ├── biome.json              extends the house-rules Biome preset, plus excludes
@@ -122,7 +122,7 @@ An app outside this repo installs the rules from GitHub, pinned to a full 40-cha
 ```json
 {
   "devDependencies": {
-    "@jakubszwajka/house-rules": "github:JakubSzwajka/house-rules-stack#<full-40-char-sha>&path:/packages/rules"
+    "@house-rules/rules": "github:JakubSzwajka/house-rules#<full-40-char-sha>&path:/packages/rules"
   }
 }
 ```
@@ -134,14 +134,25 @@ An app outside this repo installs the rules from GitHub, pinned to a full 40-cha
 
 | Entry point | Install in the app, exact pin |
 | --- | --- |
-| `@jakubszwajka/house-rules` | `eslint` `10.11.0` |
-| `@jakubszwajka/house-rules/markdown` | `@eslint/markdown` `8.0.3` |
-| `@jakubszwajka/house-rules/design` | `@eslint/css` `2.0.0` |
-| `@jakubszwajka/house-rules/dependency-cruiser` | `dependency-cruiser` `18.4.0` |
-| `@jakubszwajka/house-rules/biome` | `@biomejs/biome` `2.5.14` |
-| `@jakubszwajka/house-rules/tsconfig/*.json` | `typescript`, nothing else |
+| `@house-rules/rules` | `eslint` `10.11.0` |
+| `@house-rules/rules/markdown` | `@eslint/markdown` `8.0.3` |
+| `@house-rules/rules/design` | `@eslint/css` `2.0.0` |
+| `@house-rules/rules/dependency-cruiser` | `dependency-cruiser` `18.4.0` |
+| `@house-rules/rules/biome` | `@biomejs/biome` `2.5.14` |
+| `@house-rules/rules/tsconfig/*.json` | `typescript`, nothing else |
 
 5. [ ] To upgrade, change the SHA and run `pnpm install`.
+
+#### Migrating from @jakubszwajka/house-rules
+
+The package used to be called `@jakubszwajka/house-rules`. Version 0.5.0 is the first under the new name, `@house-rules/rules`. To move an app:
+
+1. [ ] In `package.json`, replace the dependency key with `@house-rules/rules` and the spec with the one above.
+2. [ ] In `eslint.config.mjs`, `biome.json`, `tsconfig.json`, and `.dependency-cruiser.cjs`, replace each `@jakubszwajka/house-rules` import or `extends` with `@house-rules/rules`. Subpaths such as `/markdown` and `/tsconfig/effect.json` keep their names.
+3. [ ] In `pnpm-workspace.yaml`, rename the `packageExtensions` key to `@house-rules/rules`.
+4. [ ] Run `pnpm install`, then your checks.
+
+An old pin keeps working until you move it. The old commits are in this repo's history, so a pin to one of them still resolves.
 
 ### Add an app
 

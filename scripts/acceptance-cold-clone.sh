@@ -5,7 +5,7 @@
 set -euo pipefail
 
 step="starting"
-tmp_parent="$(mktemp -d "${TMPDIR:-/tmp}/house-rules-stack-acceptance.XXXXXX")"
+tmp_parent="$(mktemp -d "${TMPDIR:-/tmp}/house-rules-acceptance.XXXXXX")"
 tmp="$tmp_parent/clone"
 
 cleanup() {

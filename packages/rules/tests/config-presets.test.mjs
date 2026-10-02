@@ -17,12 +17,8 @@ const readJson = async (file) =>
 async function withConsumer(files, run) {
   const directory = await mkdtemp(path.join(os.tmpdir(), "house-rules-presets-"));
   try {
-    await mkdir(path.join(directory, "node_modules/@jakubszwajka"), { recursive: true });
-    await symlink(
-      repositoryRoot,
-      path.join(directory, "node_modules/@jakubszwajka/house-rules"),
-      "dir",
-    );
+    await mkdir(path.join(directory, "node_modules/@house-rules"), { recursive: true });
+    await symlink(repositoryRoot, path.join(directory, "node_modules/@house-rules/rules"), "dir");
     for (const [name, content] of Object.entries(files)) {
       await mkdir(path.dirname(path.join(directory, name)), { recursive: true });
       await writeFile(
@@ -73,7 +69,7 @@ test("the preset tests run the TypeScript and Biome versions drunk-cat-stack pin
 test("TypeScript resolves both tsconfig presets through package exports", async () => {
   for (const preset of ["strict", "effect"]) {
     const tsconfig = {
-      extends: `@jakubszwajka/house-rules/tsconfig/${preset}.json`,
+      extends: `@house-rules/rules/tsconfig/${preset}.json`,
       include: ["*.ts"],
     };
     await withConsumer(
@@ -103,7 +99,7 @@ test("a consumer on the strict preset fails on an unchecked index access", async
     {
       "package.json": { type: "module" },
       "tsconfig.json": {
-        extends: "@jakubszwajka/house-rules/tsconfig/strict.json",
+        extends: "@house-rules/rules/tsconfig/strict.json",
         include: ["*.ts"],
       },
       "unchecked.ts": "export const first = (values: readonly number[]): number => values[0];\n",
@@ -119,7 +115,7 @@ test("a consumer on the strict preset fails on an unchecked index access", async
 test("Biome extends the preset from the package and enforces its rules", async () => {
   await withConsumer(
     {
-      "biome.json": { extends: ["@jakubszwajka/house-rules/biome"] },
+      "biome.json": { extends: ["@house-rules/rules/biome"] },
       "src/clean.ts": 'export { value } from "./value.js";\n',
       "src/value.ts": "export const value = 1;\n",
     },
@@ -130,7 +126,7 @@ test("Biome extends the preset from the package and enforces its rules", async (
   );
   await withConsumer(
     {
-      "biome.json": { extends: ["@jakubszwajka/house-rules/biome"] },
+      "biome.json": { extends: ["@house-rules/rules/biome"] },
       "src/barrel.ts": 'export * from "./value.js";\n',
       "src/value.ts": "export const value: number | undefined = 1;\nexport const sure = value!;\n",
       "src/BadName.ts": "export const x = 1;\n",

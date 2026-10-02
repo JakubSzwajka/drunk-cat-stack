@@ -1,5 +1,5 @@
-import houseRules from "@jakubszwajka/house-rules";
-import houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";
+import houseRules from "@house-rules/rules";
+import houseRulesMarkdown from "@house-rules/rules/markdown";
 
 export default [
   { ignores: ["**/node_modules/", "**/dist/", "**/coverage/", "**/generated/", ".agent_sources/"] },

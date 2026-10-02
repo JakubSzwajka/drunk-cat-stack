@@ -2,15 +2,15 @@
 
 Import paths:
 
-- `@jakubszwajka/house-rules/tsconfig/strict.json`: compiler flags only.
-- `@jakubszwajka/house-rules/tsconfig/effect.json`: extends `strict.json` and adds the `@effect/language-service` plugin block.
+- `@house-rules/rules/tsconfig/strict.json`: compiler flags only.
+- `@house-rules/rules/tsconfig/effect.json`: extends `strict.json` and adds the `@effect/language-service` plugin block.
 
 Both come from drunk-cat-stack's `tsconfig.base.json`. Merged, they equal it exactly. A test checks that against the copy in `tests/fixtures/presets/`.
 
 ```json
 // tsconfig.base.json
 {
-  "extends": "@jakubszwajka/house-rules/tsconfig/effect.json"
+  "extends": "@house-rules/rules/tsconfig/effect.json"
 }
 ```
 

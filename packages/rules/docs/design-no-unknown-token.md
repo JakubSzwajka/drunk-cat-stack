@@ -2,7 +2,7 @@
 
 Rule ID: `house-rules/design-no-unknown-token`
 
-The rule runs on the `@eslint/css` language. It reports a `var(--name)` whose name has no definition in the token files or in the linted file. Use the `@jakubszwajka/house-rules/design` factory to enable it.
+The rule runs on the `@eslint/css` language. It reports a `var(--name)` whose name has no definition in the token files or in the linted file. Use the `@house-rules/rules/design` factory to enable it.
 
 ```css
 .card { border-color: var(--line); }        /* passes: defined in the token file */

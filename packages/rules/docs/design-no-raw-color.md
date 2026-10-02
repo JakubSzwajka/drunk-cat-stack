@@ -2,7 +2,7 @@
 
 Rule ID: `house-rules/design-no-raw-color`
 
-The rule runs on the `@eslint/css` language. It reports a colour written out in a CSS declaration value instead of taken from a design token. Use the `@jakubszwajka/house-rules/design` factory to enable it.
+The rule runs on the `@eslint/css` language. It reports a colour written out in a CSS declaration value instead of taken from a design token. Use the `@house-rules/rules/design` factory to enable it.
 
 ```css
 .drop[data-over] {

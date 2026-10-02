@@ -1,12 +1,12 @@
 # Dependency Cruiser layout preset
 
-Import path: `@jakubszwajka/house-rules/dependency-cruiser`
+Import path: `@house-rules/rules/dependency-cruiser`
 
 This preset is not an ESLint preset. It is a [Dependency Cruiser](https://github.com/sverweij/dependency-cruiser) configuration for a workspace monorepo with apps under `apps/` and packages under `packages/`. The `layout(options)` factory returns a whole config object, `forbidden` rules and `options` together, that a `.dependency-cruiser.cjs` file can export as-is. `tests/fixtures/dependency-cruiser/layout-hosti.snapshot.json` is a snapshot of `layout({ scope: "@hosti/" })`, and a test compares them. The first 13 rules and the `options` block are drunk-cat-stack's hand-written `.dependency-cruiser.cjs` from before 0.4.0. Version 0.4.0 adds three rules, so drunk-cat-stack no longer equals `layout()` until it switches to `layout()` in the next phase.
 
 ```js
 // .dependency-cruiser.cjs
-module.exports = require("@jakubszwajka/house-rules/dependency-cruiser").layout({ scope: "@acme/" });
+module.exports = require("@house-rules/rules/dependency-cruiser").layout({ scope: "@acme/" });
 ```
 
 Run it with the Dependency Cruiser CLI:
@@ -95,7 +95,7 @@ The returned `options` block:
 
 ```js
 // .dependency-cruiser.cjs
-const { layout } = require("@jakubszwajka/house-rules/dependency-cruiser");
+const { layout } = require("@house-rules/rules/dependency-cruiser");
 
 const config = layout({ scope: "@acme/", layers: { useCases: "application" } });
 config.forbidden.push({

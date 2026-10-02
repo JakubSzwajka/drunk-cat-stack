@@ -1,6 +1,6 @@
-# @jakubszwajka/house-rules
+# @house-rules/rules
 
-This package, in `packages/rules` of the house-rules-stack repository, is the one installable home of the operator's house rules and house configs. It is a private GitHub package, installed by Git subpath, with six ESLint rules, one Dependency Cruiser preset, two TypeScript presets, one Biome preset and one bin. It extracts Hosti's comment-discipline rule without changing the rule's semantics, adds a Markdown rule that reports relative links to paths git does not track, adds four design-token rules for CSS and JS/TS, ships drunk-cat-stack's monorepo layout rules as a reusable Dependency Cruiser config, and ships drunk-cat-stack's tsconfig, Biome config and exact-pins script.
+This package, in `packages/rules` of the house-rules repository, is the one installable home of the operator's house rules and house configs. It is a private GitHub package, installed by Git subpath, with six ESLint rules, one Dependency Cruiser preset, two TypeScript presets, one Biome preset and one bin. It extracts Hosti's comment-discipline rule without changing the rule's semantics, adds a Markdown rule that reports relative links to paths git does not track, adds four design-token rules for CSS and JS/TS, ships drunk-cat-stack's monorepo layout rules as a reusable Dependency Cruiser config, and ships drunk-cat-stack's tsconfig, Biome config and exact-pins script.
 
 ## Split with consumers
 
@@ -16,10 +16,10 @@ This package owns house rules and house configs. A consumer repository keeps onl
 - **Rule**: one of the six lint rules in this package: `comment-discipline`, `no-broken-relative-links`, `design-no-raw-color`, `design-no-raw-color-literal`, `design-no-unknown-token`, or `design-scale-value`.
 - **Preset**: a flat-config array a consumer spreads into `eslint.config.mjs`. There are three:
   - `recommended`, exported as `plugin.configs.recommended` from the package root. It runs `comment-discipline` on JS, JSX, MJS, CJS, TS, TSX, MTS, and CTS.
-  - `markdown`, the default export of the `@jakubszwajka/house-rules/markdown` subpath. It runs `no-broken-relative-links` on `**/*.md` through the `@eslint/markdown` GFM language.
-  - `design`, the preset returned by the `design(options)` factory, the default and named export of the `@jakubszwajka/house-rules/design` subpath. It returns a CSS block on the `@eslint/css` `css/css` language running the three CSS design rules, and a source block running `design-no-raw-color-literal` with the same parser setup as `recommended`.
-- **Layout preset**: the Dependency Cruiser config returned by the `layout(options)` factory, the named export of the `@jakubszwajka/house-rules/dependency-cruiser` subpath. It is not an ESLint preset and not one of the three presets above. It returns a whole Dependency Cruiser config, `forbidden` plus `options`, holding 16 **layout rules**. Layout rules are Dependency Cruiser rules, not ESLint rules, and are not counted among the six.
-- **Config preset**: a JSON file another tool extends by package specifier. There are three: `tsconfig/strict.json`, `tsconfig/effect.json` (extends `strict.json`, adds the `@effect/language-service` plugin block), and `biome/preset.json`, exported as `@jakubszwajka/house-rules/biome`. They are not ESLint presets.
+  - `markdown`, the default export of the `@house-rules/rules/markdown` subpath. It runs `no-broken-relative-links` on `**/*.md` through the `@eslint/markdown` GFM language.
+  - `design`, the preset returned by the `design(options)` factory, the default and named export of the `@house-rules/rules/design` subpath. It returns a CSS block on the `@eslint/css` `css/css` language running the three CSS design rules, and a source block running `design-no-raw-color-literal` with the same parser setup as `recommended`.
+- **Layout preset**: the Dependency Cruiser config returned by the `layout(options)` factory, the named export of the `@house-rules/rules/dependency-cruiser` subpath. It is not an ESLint preset and not one of the three presets above. It returns a whole Dependency Cruiser config, `forbidden` plus `options`, holding 16 **layout rules**. Layout rules are Dependency Cruiser rules, not ESLint rules, and are not counted among the six.
+- **Config preset**: a JSON file another tool extends by package specifier. There are three: `tsconfig/strict.json`, `tsconfig/effect.json` (extends `strict.json`, adds the `@effect/language-service` plugin block), and `biome/preset.json`, exported as `@house-rules/rules/biome`. They are not ESLint presets.
 - **Pins bin**: `house-rules-pins`, `bin/pins.mjs`. It fails when a dependency in the root or a workspace `package.json` is not an exact version, `workspace:<exact>`, or a Git spec pinned to a full commit.
 - **Consumer**: a repository that installs this package from GitHub and uses one or more of its presets or its bin.
 - **Exception**: one closed, syntax-owned directive or legal header accepted by `comment-discipline`.
@@ -32,7 +32,7 @@ This package owns house rules and house configs. A consumer repository keeps onl
 
 ## Contract
 
-- Package name and version are `@jakubszwajka/house-rules@0.5.0` until an intentional release decision changes them. `package.json` and `plugin.meta.version` carry the same version, and `plugin.meta.name` is the package name.
+- Package name and version are `@house-rules/rules@0.5.0` until an intentional release decision changes them. `package.json` and `plugin.meta.version` carry the same version, and `plugin.meta.name` is the package name.
 - The package is ESM, runs checked-in `.mjs` source directly (plus the one `.cjs` layout preset), and supports Node `>=24.21.0`, matching every consumer (all pin Node 24.21.0 in `.nvmrc` and `engines: >=24.21.0`). CI reads `.nvmrc`.
 - `private: true` stays set. Do not npm-publish.
 - The plugin key is `house-rules`.
