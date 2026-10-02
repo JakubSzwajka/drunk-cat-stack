@@ -5,5 +5,5 @@ export {
   defineContract,
   type InputSchema,
   type PlainSchema,
-} from "./contract.js";
-export { type Capability, implement } from "./implement.js";
+} from "./contract.ts";
+export { type Capability, implement } from "./implement.ts";
