@@ -1,0 +1,1 @@
+export { gone } from "./missing";

@@ -1,0 +1,124 @@
+# @jakubszwajka/house-rules
+
+House rules and house configs. One exact GitHub commit pin brings all of it: six ESLint rules, 16 Dependency Cruiser layout rules, TypeScript strict flags, Effect diagnostics, Biome linter and formatter, and an exact-pins checker. Private, not on npm.
+
+## Install
+
+Node `>=24.21.0` only. The pins bin uses `fs.globSync`, with no fallback for older Node. The package lives in `packages/rules` of the house-rules-stack repository, so install it with pnpm and a Git subpath spec. The pins bin reads `pnpm-workspace.yaml`, so the app needs one.
+
+```json
+{
+  "devDependencies": {
+    "@jakubszwajka/house-rules": "github:JakubSzwajka/house-rules-stack#<full-commit-sha>&path:/packages/rules"
+  }
+}
+```
+
+## Rules and checks
+
+| Rule | Catches | Tool | Enable via | Docs |
+| --- | --- | --- | --- | --- |
+| `comment-discipline` | Top-level narrative, multiline comments, adjacent groups; keeps one-line whys beside code | ESLint | `configs.recommended` | [comment-discipline.md](docs/comment-discipline.md) |
+| `no-broken-relative-links` | Relative Markdown links to untracked paths | ESLint | `@jakubszwajka/house-rules/markdown` | [no-broken-relative-links.md](docs/no-broken-relative-links.md) |
+| `design-no-raw-color` | Raw hex, rgb(), hsl(), etc. in CSS | ESLint | `design()` factory | [design-no-raw-color.md](docs/design-no-raw-color.md) |
+| `design-no-raw-color-literal` | Raw hex, rgb(), hsl(), etc. in JS/TS strings | ESLint | `design()` factory | [design-no-raw-color-literal.md](docs/design-no-raw-color-literal.md) |
+| `design-no-unknown-token` | `var(--name)` with no definition | ESLint | `design()` factory | [design-no-unknown-token.md](docs/design-no-unknown-token.md) |
+| `design-scale-value` | CSS values off a fixed scale | ESLint | `design()` factory | [design-scale-value.md](docs/design-scale-value.md) |
+| `no-cycles` | Circular imports | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `packages-do-not-import-apps` | Packages importing apps | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `apps-do-not-import-other-apps` | Apps importing other apps | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `packages-imported-by-name` | Local imports of packages by path instead of name | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `packages-public-entry-only` | Imports of package internals | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `delivery-does-not-import-server` | Delivery layer importing server layer | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `server-does-not-import-delivery` | Server layer importing delivery layer | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `use-cases-do-not-import-outer-layers` | Use-cases importing delivery or server | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `no-unresolved-deep-package-imports` | Unresolved deep package imports | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `production-does-not-import-tests` | Production code importing tests | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `tests-live-in-tests-dir` | Test files outside tests/ folders | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `tests-do-not-import-internals` | Tests importing package internals | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `no-unresolved-imports` | Unresolved imports | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `app-code-in-layers` | App code outside layer folders | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `use-cases-do-not-import-use-cases` | Use-case importing another use-case | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| `no-ownerless-files` | `utils/`, `helpers/`, `misc/` files or folders | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
+| Strict compiler flags | 15 flags: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and more | TypeScript | `tsconfig/strict.json` | [tsconfig.md](docs/tsconfig.md) |
+| Effect diagnostics | 31 diagnostics set to error | TypeScript | `tsconfig/effect.json` | [tsconfig.md](docs/tsconfig.md) |
+| `noReExportAll` | `export * from` | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
+| `noExcessiveLinesPerFile` | Files over 300 lines (warn) | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
+| `noNonNullAssertion` | `!` non-null assertions | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
+| `useFilenamingConvention` | Files not kebab-case or export | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
+| Formatter | indentWidth 2, lineWidth 100, indentStyle space | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
+| Exact pins | Every dependency must be an exact version, `workspace:<exact>`, or a Git spec with full commit SHA | Node | `house-rules-pins` bin | [pins.md](docs/pins.md) |
+
+## Wire it up
+
+```js
+// eslint.config.mjs
+import houseRules from "@jakubszwajka/house-rules";
+import houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";
+import design from "@jakubszwajka/house-rules/design";
+
+export default [
+  { ignores: ["dist/**", "coverage/**"] },
+  ...houseRules.configs.recommended,
+  ...houseRulesMarkdown,
+  ...design({
+    tokenFiles: ["src/styles/tokens.css"],
+    css: { files: ["**/*.css"] },
+    source: { files: ["**/*.{ts,tsx}"] },
+    rules: { "design-scale-value": [{ property: "^border-radius$", allowed: ["0", "4px", "8px"] }] },
+  }),
+  // Override narrowly with a reason:
+  { files: ["scripts/vendor/**"], rules: { "house-rules/comment-discipline": "off" } },
+];
+```
+
+```js
+// .dependency-cruiser.cjs
+module.exports = require("@jakubszwajka/house-rules/dependency-cruiser").layout({
+  scope: "@acme/",
+});
+```
+
+```json
+// tsconfig.base.json
+{
+  "extends": "@jakubszwajka/house-rules/tsconfig/effect.json"
+}
+```
+
+```json
+// biome.json
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+  "extends": ["@jakubszwajka/house-rules/biome"],
+  "files": {
+    "includes": ["**", "!!node_modules", "!!dist", "!!coverage"]
+  }
+}
+```
+
+```json
+// package.json
+{
+  "scripts": {
+    "pins": "house-rules-pins"
+  }
+}
+```
+
+Biome replaces an extended `files.includes` instead of merging, so it stays in the consumer. See per-tool docs for options, detailed behavior, and limitations.
+
+## Commands
+
+```sh
+pnpm test           # Run tests
+pnpm run check      # Tests, then a syntax check of every source file
+pnpm run pack:check # Verify tarball
+```
+
+## Upgrade flow
+
+1. Review the commit diff and rule docs between current and candidate commit.
+2. Update the commit SHA in `package.json`, regenerate lockfile.
+3. Run `pnpm run check`, `pnpm run pack:check`, and consumer checks (ESLint, Biome, typecheck, Dependency Cruiser, pins).
+4. Merge lockfile and config changes together. Do not npm-publish.

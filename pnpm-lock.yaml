@@ -178,8 +178,8 @@ importers:
         specifier: 8.0.3
         version: 8.0.3(supports-color@7.2.0)
       '@jakubszwajka/house-rules':
-        specifier: github:JakubSzwajka/house-rules#ea83c2654485eb0088a57c48e93602d6debfe897
-        version: https://codeload.github.com/JakubSzwajka/house-rules/tar.gz/ea83c2654485eb0088a57c48e93602d6debfe897(@eslint/markdown@8.0.3(supports-color@7.2.0))(dependency-cruiser@18.4.0)(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)
+        specifier: workspace:0.5.0
+        version: link:packages/rules
       '@swc/core':
         specifier: 1.16.2
         version: 1.16.2
@@ -236,6 +236,34 @@ importers:
       vitest:
         specifier: 5.0.1
         version: 5.0.1(vite@8.3.0)
+
+  packages/rules:
+    dependencies:
+      '@typescript-eslint/parser':
+        specifier: 8.70.1
+        version: 8.70.1(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 2.5.14
+        version: 2.5.14
+      '@eslint/css':
+        specifier: 2.0.0
+        version: 2.0.0
+      '@eslint/markdown':
+        specifier: 8.0.3
+        version: 8.0.3(supports-color@7.2.0)
+      dependency-cruiser:
+        specifier: 18.4.0
+        version: 18.4.0
+      eslint:
+        specifier: 10.11.0
+        version: 10.11.0(supports-color@7.2.0)
+      typescript-7:
+        specifier: npm:typescript@7.0.2
+        version: typescript@7.0.2
 
 packages:
 
@@ -369,6 +397,14 @@ packages:
     resolution: {integrity: sha512-MwcE1P+AZ4C6DWlpin/OmOA54mmIZ/+xZuJiQd4SyB29oAJjN30UW9wkKNptW2ctp4cEsvhlLY/CsQ1uoHDloQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
+  '@eslint/css-tree@4.1.1':
+    resolution: {integrity: sha512-A+s89eP+yDAPkKjnIOfjlkGifg5J7GPn01nWx14UjBVWktfkxOU4975F9ZZ13xNxkGiblNcBaAqgKhnQrW6SWA==}
+    engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
+  '@eslint/css@2.0.0':
+    resolution: {integrity: sha512-lODVRbtxOXgcSOWNvv3gE4A8oRTSUHefA0tX9zrWUD57F+5RTLGDX9I8bnHQROO8nWb0hrmke0uO23pTlNfZ0A==}
+    engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
   '@eslint/markdown@8.0.3':
     resolution: {integrity: sha512-rBTSSShrq7e4O+PWfeE4azH4/CWPNrC+VGxBXiW00o3vYVJnznsZiDayj3KC9JztIMVRZxZHn2nrDIUau/4j7A==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
@@ -400,24 +436,6 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
-
-  '@jakubszwajka/house-rules@https://codeload.github.com/JakubSzwajka/house-rules/tar.gz/ea83c2654485eb0088a57c48e93602d6debfe897':
-    resolution: {gitHosted: true, integrity: sha512-jI+dDzYfyLHvZgfmVc1FOmVsvEb1+Sgu0JKV0r8xdAwh6Ecmr97EdWoD/fozkYNMQ3z6l7ESB3V/z54XwQlcnA==, tarball: https://codeload.github.com/JakubSzwajka/house-rules/tar.gz/ea83c2654485eb0088a57c48e93602d6debfe897}
-    version: 0.5.0
-    engines: {node: '>=24.21.0'}
-    hasBin: true
-    peerDependencies:
-      '@eslint/css': ^2.0.0
-      '@eslint/markdown': ^8.0.3
-      dependency-cruiser: ^18.4.0
-      eslint: '>=9'
-    peerDependenciesMeta:
-      '@eslint/css':
-        optional: true
-      '@eslint/markdown':
-        optional: true
-      dependency-cruiser:
-        optional: true
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -1390,6 +1408,9 @@ packages:
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
 
+  mdn-data@2.35.0:
+    resolution: {integrity: sha512-k+1+dEIm2z/BEfdvYzT/fIyAGeDBo/1AJNJI4ilFXJRYoxP/3Ds+GP8shAOIq8jYXY9N5nGB3Ag104NsagmLAA==}
+
   micromark-core-commonmark@2.0.3:
     resolution: {integrity: sha512-RDBrHEMSxVFLg6xvnXmb1Ayr2WzLAWjeSATAoxwKYJV94TeNavgoIdA0a9ytzDSVzBy2YKFK+emCPOEibLeCrg==}
 
@@ -1903,6 +1924,17 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
+  '@eslint/css-tree@4.1.1':
+    dependencies:
+      mdn-data: 2.35.0
+      source-map-js: 1.2.1
+
+  '@eslint/css@2.0.0':
+    dependencies:
+      '@eslint/core': 1.2.1
+      '@eslint/css-tree': 4.1.1
+      '@eslint/plugin-kit': 0.7.3
+
   '@eslint/markdown@8.0.3(supports-color@7.2.0)':
     dependencies:
       '@eslint/core': 1.2.1
@@ -1941,17 +1973,6 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.4.3': {}
-
-  '@jakubszwajka/house-rules@https://codeload.github.com/JakubSzwajka/house-rules/tar.gz/ea83c2654485eb0088a57c48e93602d6debfe897(@eslint/markdown@8.0.3(supports-color@7.2.0))(dependency-cruiser@18.4.0)(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)':
-    dependencies:
-      '@typescript-eslint/parser': 8.70.1(eslint@10.11.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
-      eslint: 10.11.0(supports-color@7.2.0)
-      typescript: 6.0.3
-    optionalDependencies:
-      '@eslint/markdown': 8.0.3(supports-color@7.2.0)
-      dependency-cruiser: 18.4.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
@@ -2801,6 +2822,8 @@ snapshots:
   mdast-util-to-string@4.0.0:
     dependencies:
       '@types/mdast': 4.0.4
+
+  mdn-data@2.35.0: {}
 
   micromark-core-commonmark@2.0.3:
     dependencies:

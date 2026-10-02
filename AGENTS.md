@@ -2,7 +2,7 @@
 
 This file is the law for agents and people working in this repo, and in any project made from the house-rules-stack template. Read `VISION.md` for why. It does not override this file. Read `CONTEXT.md` for the words this repo uses.
 
-The house rules and the tool configs come from the pinned plugin `@jakubszwajka/house-rules`. This repo keeps thin configs that extend its presets, the project values such as the `@hosti/` scope, and the files no tool can inherit. Change a house rule in the plugin, not by copying a preset here.
+The house rules and the tool configs come from the plugin `@jakubszwajka/house-rules`, which lives in `packages/rules`. The root uses it as `workspace:0.5.0`. This repo keeps thin configs that extend its presets, the project values such as the `@hosti/` scope, and the files no tool can inherit. Change a house rule in `packages/rules`, not by copying a preset into a thin config.
 
 ## Commands
 
@@ -34,6 +34,7 @@ The rules table in the house-rules README lists every checked rule, its tool, an
 - An app or package imports another package by its name, such as `@hosti/bookings`, and declares it in its own `package.json` as `workspace:<exact version>`. Never import another package by a relative path.
 - A package has one public entry, `src/index.ts`, and its `package.json` `exports` names only that entry. Callers never import a file under the package's `src/internal/`, by name or by path.
 - Each workspace package has its own `tsconfig.json` that extends the root `tsconfig.base.json`, plus `typecheck` and `test` scripts.
+- `packages/rules` is the exception. It is the plain-JavaScript house plugin, with many entries in `exports`, no `tsconfig.json`, and a `typecheck` script that runs `node --check` over each source file. The layout rules, the `comment-discipline` rule, and Biome on its test fixtures skip it. Its tests run in `pnpm test`.
 
 ## Layers inside an app
 
@@ -93,7 +94,7 @@ The "Prose rules" section in `README.md` lists what no tool here checks. A green
 
 ## Pins
 
-Every dependency in the root `package.json` and in each workspace `package.json` is an exact version. A GitHub dependency is pinned to a full 40-character commit SHA. A workspace dependency is `workspace:` plus the exact version, such as `workspace:0.0.0`. `packageManager` names an exact pnpm version. `pnpm-workspace.yaml` sets `saveExact: true` and `saveWorkspaceProtocol: true`, so `pnpm add <pkg>` writes an exact pin, and `pnpm add <workspace package>` writes `workspace:<exact version>`. `pnpm check` runs the plugin's `house-rules-pins` bin, which fails on `^`, `~`, ranges, tags, branch names, and `workspace:*`. Node is pinned in `.nvmrc`, and CI reads it from there.
+Every dependency in the root `package.json` and in each workspace `package.json` is an exact version. A GitHub dependency is pinned to a full 40-character commit SHA, optionally followed by a pnpm subpath such as `&path:/packages/rules`. A workspace dependency is `workspace:` plus the exact version, such as `workspace:0.0.0`. `packageManager` names an exact pnpm version. `pnpm-workspace.yaml` sets `saveExact: true` and `saveWorkspaceProtocol: true`, so `pnpm add <pkg>` writes an exact pin, and `pnpm add <workspace package>` writes `workspace:<exact version>`. `pnpm check` runs the plugin's `house-rules-pins` bin, which fails on `^`, `~`, ranges, tags, branch names, and `workspace:*`. Node is pinned in `.nvmrc`, and CI reads it from there.
 
 `pnpm-workspace.yaml` also holds the install policy:
 

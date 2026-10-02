@@ -32,6 +32,21 @@ describe("thin configs over the house plugin", () => {
     }
   });
 
+  it(".dependency-cruiser.cjs excludes only the in-repo plugin on top of the preset's excludes", () => {
+    const { layout } = require(`${PLUGIN}/dependency-cruiser`);
+    const config = require("../.dependency-cruiser.cjs");
+    const preset = layout({ scope: "@hosti/" }).options.exclude.path;
+    assert.equal(config.options.exclude.path, `${preset}|^packages/rules/`);
+  });
+
+  it("the root uses the in-repo plugin as a workspace package", () => {
+    assert.equal(
+      readJson("package.json").devDependencies[PLUGIN],
+      `workspace:${readJson("packages/rules/package.json").version}`,
+    );
+    assert.equal(readJson("packages/rules/package.json").name, PLUGIN);
+  });
+
   it("the pins script runs the plugin's bin", () => {
     assert.equal(readJson("package.json").scripts.pins, "house-rules-pins");
   });
