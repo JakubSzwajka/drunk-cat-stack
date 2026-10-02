@@ -1,0 +1,38 @@
+# TypeScript presets
+
+Import paths:
+
+- `@jakubszwajka/house-rules/tsconfig/strict.json`: compiler flags only.
+- `@jakubszwajka/house-rules/tsconfig/effect.json`: extends `strict.json` and adds the `@effect/language-service` plugin block.
+
+Both come from drunk-cat-stack's `tsconfig.base.json`. Merged, they equal it exactly. A test checks that against the copy in `tests/fixtures/presets/`.
+
+```json
+// tsconfig.base.json
+{
+  "extends": "@jakubszwajka/house-rules/tsconfig/effect.json"
+}
+```
+
+Each workspace keeps its own `tsconfig.json` with `include` and anything project-specific, such as `"jsx": "preserve"`, and extends the base file as before.
+
+## strict.json
+
+`target` and `lib` ES2023, `module` and `moduleResolution` NodeNext, `moduleDetection: "force"`, `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `isolatedModules`, `verbatimModuleSyntax`, `erasableSyntaxOnly`, `forceConsistentCasingInFileNames`, `skipLibCheck`, `noEmit`. NodeNext needs `"type": "module"` in the consumer's `package.json`, or `.mts` files.
+
+## effect.json
+
+Adds one `plugins` entry for `@effect/language-service`, with `namespaceImportPackages: ["effect"]` and every diagnostic severity as drunk-cat-stack sets it: most at `error`, and `importFromBarrel`, `strictEffectProvide`, `lazyEffect` and `strictBooleanExpressions` off. The diagnostics only run in a compiler patched by `@effect/tsgo` (`effect-tsgo patch`). A plain `tsc` ignores the block.
+
+`plugins` is an array, so a consumer that sets its own `compilerOptions.plugins` replaces the whole Effect block rather than adding to it.
+
+## Resolution
+
+TypeScript resolves the `extends` specifier through this package's `exports` map. That was checked with TypeScript 7.0.2: an export whose name differs from the file path still resolves, so it is the `exports` field doing the work, not a file-path fallback.
+
+## Tested against
+
+| Tool | Version |
+| --- | --- |
+| `typescript` | 7.0.2 (this repository installs it as the `typescript-7` alias, so the ESLint parser keeps its TypeScript 6 peer) |
+| `@effect/tsgo` | 0.45.0 (proven in a drunk-cat-stack copy: a floating Effect fails with `TS377001 ... effect(floatingEffect)`) |

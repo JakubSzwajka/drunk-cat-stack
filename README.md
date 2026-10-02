@@ -1,8 +1,8 @@
 # house-rules-stack
 
-house-rules-stack is a TypeScript monorepo template. It shows [`@jakubszwajka/house-rules`](https://github.com/JakubSzwajka/house-rules) wired into a real [pnpm](https://pnpm.io) workspace run by [Turborepo](https://turborepo.com), with example code in [Effect 4](https://effect.website). It also holds the prose rules I want in every project, the ones no tool can check.
+house-rules-stack is a TypeScript monorepo template. It holds [`@jakubszwajka/house-rules`](packages/rules/README.md) in `packages/rules` and shows it wired into a real [pnpm](https://pnpm.io) workspace run by [Turborepo](https://turborepo.com), with example code in [Effect 4](https://effect.website). It also holds the prose rules I want in every project, the ones no tool can check.
 
-Every lint rule, preset, and check in `pnpm check` comes from house-rules for deterministic feedback, and [its README lists them](https://github.com/JakubSzwajka/house-rules#rules-and-checks).
+Every lint rule, preset, and check in `pnpm check` comes from house-rules for deterministic feedback, and [its README lists them](packages/rules/README.md#rules-and-checks).
 
 It is a GitHub template. Create a repo from it with `gh repo create <name> --template JakubSzwajka/house-rules-stack`. It also carries the reference copy of the release workflow. See [`docs/release.md`](docs/release.md) to adopt it.
 
@@ -12,6 +12,7 @@ It is a GitHub template. Create a repo from it with `gh repo create <name> --tem
 .
 ├── apps/api/               @hosti/api: delivery, server, use-cases
 ├── packages/bookings/      @hosti/bookings: one Effect module, src/index.ts is its only export
+├── packages/rules/         @jakubszwajka/house-rules: the house rules, presets, and pins bin
 ├── tests/                  fence and thin-config wiring tests
 ├── .dependency-cruiser.cjs layout({ scope: "@hosti/" }) from house-rules
 ├── biome.json              extends the house-rules Biome preset, plus excludes
@@ -30,7 +31,7 @@ Root tools run once over the whole repo. Turborepo runs `typecheck` and `test` i
 
 ## What the stack adds
 
-House-rules cannot ship these, because they live in files a package cannot hand down:
+House-rules cannot ship these, because they live in files a package cannot hand down. The root uses the in-repo copy through `workspace:0.5.0`. Biome skips `packages/rules/tests/fixtures`, ESLint turns `comment-discipline` off in `packages/rules`, and Dependency Cruiser skips `packages/rules`: the plugin defines those rules, and its fixtures break them on purpose.
 
 - **The fence.** lefthook runs `pnpm check` and then `pnpm test` before each commit. The agent harnesses block `git ... --no-verify` and friends. See [Fence](#fence).
 - **Install policy** in `pnpm-workspace.yaml`. `saveExact` and `saveWorkspaceProtocol` make `pnpm add` write exact pins. `engineStrict` enforces engines. `minimumReleaseAge: 1440` refuses a version younger than a day. `allowBuilds` sets every install script to `false`. `packageExtensions` gives the ESLint plugin TypeScript 6.0.3.
@@ -107,12 +108,40 @@ Start from the template, or copy these into an existing pnpm workspace:
 
 1. [ ] The thin configs: `biome.json`, `eslint.config.mjs`, `tsconfig.base.json`, `.dependency-cruiser.cjs`.
 2. [ ] The stack files: `turbo.json`, `pnpm-workspace.yaml`, `.github/workflows/ci.yml`, `.env.schema`, `.varlock/config.json`, and the `.env` lines from `.gitignore`.
-3. [ ] The root `package.json` `scripts`, `devDependencies`, `engines`, and `packageManager`. Keep house-rules pinned to a full commit SHA. To upgrade, change the SHA and run `pnpm install`.
+3. [ ] The root `package.json` `scripts`, `devDependencies`, `engines`, and `packageManager`. Replace the `workspace:` house-rules dependency with the Git spec in [Using the rules in another app](#using-the-rules-in-another-app).
 4. [ ] The fence: `.nvmrc`, `lefthook.yml`, `scripts/`, `tests/`, `.agents/settings.json`, `.pi/extensions/git-interceptor.ts`, `NOTICE`. Add `skills/` if your agents should use them.
 5. [ ] `AGENTS.md`, rewritten for your project. Write your own `VISION.md`.
 6. [ ] Rename `@hosti/` everywhere: package names, dependencies, imports, `Context.Service` keys, and the `scope` passed to `layout()`.
 7. [ ] If your folders differ, pass `layout()` options such as `appsDir`, `packagesDir`, `layers`, `publicEntry`, `internalDir`, `appEntryFiles`, `ownerlessNames`, or `testsDir`. The house-rules docs explain each one.
 8. [ ] Run `pnpm install`, then `pnpm check` and `pnpm test`.
+
+### Using the rules in another app
+
+An app outside this repo installs the rules from GitHub, pinned to a full 40-character commit of this repo, with a pnpm subpath:
+
+```json
+{
+  "devDependencies": {
+    "@jakubszwajka/house-rules": "github:JakubSzwajka/house-rules-stack#<full-40-char-sha>&path:/packages/rules"
+  }
+}
+```
+
+1. [ ] Use Node `>=24.21.0` and pnpm. npm and Yarn do not read the `&path:` subpath.
+2. [ ] Keep a `pnpm-workspace.yaml` with a `packages:` list at the app root. The `house-rules-pins` bin reads it to find every manifest.
+3. [ ] Keep the `packageExtensions` entry that gives the plugin TypeScript 6.0.3, as this repo's `pnpm-workspace.yaml` does.
+4. [ ] Install the peer dependencies of each entry point you import. `@eslint/css`, `@eslint/markdown`, and `dependency-cruiser` are optional peers, so pnpm does not install them for you. Importing `/design` without `@eslint/css` fails with `ERR_MODULE_NOT_FOUND`. Pin each one exactly, like every other dependency:
+
+| Entry point | Install in the app, exact pin |
+| --- | --- |
+| `@jakubszwajka/house-rules` | `eslint` `10.11.0` |
+| `@jakubszwajka/house-rules/markdown` | `@eslint/markdown` `8.0.3` |
+| `@jakubszwajka/house-rules/design` | `@eslint/css` `2.0.0` |
+| `@jakubszwajka/house-rules/dependency-cruiser` | `dependency-cruiser` `18.4.0` |
+| `@jakubszwajka/house-rules/biome` | `@biomejs/biome` `2.5.14` |
+| `@jakubszwajka/house-rules/tsconfig/*.json` | `typescript`, nothing else |
+
+5. [ ] To upgrade, change the SHA and run `pnpm install`.
 
 ### Add an app
 

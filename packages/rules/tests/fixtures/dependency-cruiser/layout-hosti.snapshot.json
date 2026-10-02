@@ -1,0 +1,199 @@
+{
+  "forbidden": [
+    {
+      "name": "no-cycles",
+      "severity": "error",
+      "from": {},
+      "to": {
+        "circular": true
+      }
+    },
+    {
+      "name": "packages-do-not-import-apps",
+      "severity": "error",
+      "from": {
+        "path": "^packages/"
+      },
+      "to": {
+        "path": "^apps/"
+      }
+    },
+    {
+      "name": "apps-do-not-import-other-apps",
+      "severity": "error",
+      "from": {
+        "path": "^(apps/[^/]+)/"
+      },
+      "to": {
+        "path": "^apps/",
+        "pathNot": "^$1/"
+      }
+    },
+    {
+      "name": "packages-imported-by-name",
+      "severity": "error",
+      "from": {
+        "path": "^((?:apps|packages)/[^/]+)/"
+      },
+      "to": {
+        "path": "^packages/",
+        "pathNot": "^$1/",
+        "dependencyTypes": [
+          "local"
+        ]
+      }
+    },
+    {
+      "name": "packages-public-entry-only",
+      "severity": "error",
+      "from": {
+        "path": "^((?:apps|packages)/[^/]+)/"
+      },
+      "to": {
+        "path": "^packages/[^/]+/(?!src/index[.]ts$)",
+        "pathNot": "^$1/"
+      }
+    },
+    {
+      "name": "delivery-does-not-import-server",
+      "severity": "error",
+      "from": {
+        "path": "^apps/[^/]+/src/delivery(?:/|$)"
+      },
+      "to": {
+        "path": "^apps/[^/]+/src/server(?:/|$)"
+      }
+    },
+    {
+      "name": "server-does-not-import-delivery",
+      "severity": "error",
+      "from": {
+        "path": "^apps/[^/]+/src/server(?:/|$)"
+      },
+      "to": {
+        "path": "^apps/[^/]+/src/delivery(?:/|$)"
+      }
+    },
+    {
+      "name": "use-cases-do-not-import-outer-layers",
+      "severity": "error",
+      "from": {
+        "path": "^apps/[^/]+/src/use-cases(?:/|$)"
+      },
+      "to": {
+        "path": [
+          "^apps/[^/]+/src/delivery(?:/|$)",
+          "^apps/[^/]+/src/server(?:/|$)"
+        ]
+      }
+    },
+    {
+      "name": "no-unresolved-deep-package-imports",
+      "severity": "error",
+      "from": {},
+      "to": {
+        "path": "^@hosti/[^/]+/.+",
+        "couldNotResolve": true
+      }
+    },
+    {
+      "name": "production-does-not-import-tests",
+      "severity": "error",
+      "from": {
+        "path": "^(?:apps|packages)/[^/]+/src(?:/|$)",
+        "pathNot": "(?:^|/)(?:tests?|__tests__)(?:/|$)|[.](?:test|spec)[.][^/]+$"
+      },
+      "to": {
+        "path": "(?:^|/)(?:tests?|__tests__)(?:/|$)|[.](?:test|spec)[.][^/]+$"
+      }
+    },
+    {
+      "name": "tests-live-in-tests-dir",
+      "severity": "error",
+      "module": {
+        "path": "^(?:apps|packages)/[^/]+/.*[.](?:test|spec)[.][^/]+$",
+        "pathNot": "^(?:apps|packages)/[^/]+/src/(?:tests|.*/tests)/[^/]+[.](?:test|spec)[.][^/]+$",
+        "numberOfDependentsLessThan": 100
+      },
+      "from": {}
+    },
+    {
+      "name": "tests-do-not-import-internals",
+      "severity": "error",
+      "from": {
+        "path": "(?:^|/)(?:tests?|__tests__)(?:/|$)|[.](?:test|spec)[.][^/]+$"
+      },
+      "to": {
+        "path": "^packages/[^/]+/src/internal(?:/|$)"
+      }
+    },
+    {
+      "name": "no-unresolved-imports",
+      "severity": "error",
+      "from": {},
+      "to": {
+        "couldNotResolve": true
+      }
+    },
+    {
+      "name": "app-code-in-layers",
+      "severity": "error",
+      "module": {
+        "path": "^apps/[^/]+/src/",
+        "pathNot": [
+          "^apps/[^/]+/src/(?:delivery|server|use-cases)/",
+          "^apps/[^/]+/src/(?:main[.]ts|index[.]ts)$",
+          "(?:^|/)(?:tests?|__tests__)(?:/|$)|[.](?:test|spec)[.][^/]+$"
+        ],
+        "numberOfDependentsLessThan": 100
+      },
+      "from": {}
+    },
+    {
+      "name": "use-cases-do-not-import-use-cases",
+      "severity": "error",
+      "from": {
+        "path": "^(apps/[^/]+/src/use-cases/[^/]+)",
+        "pathNot": "(?:^|/)(?:tests?|__tests__)(?:/|$)|[.](?:test|spec)[.][^/]+$"
+      },
+      "to": {
+        "path": "^apps/[^/]+/src/use-cases/[^/]+",
+        "pathNot": [
+          "^$1(?:/|$)",
+          "(?:^|/)(?:tests?|__tests__)(?:/|$)|[.](?:test|spec)[.][^/]+$"
+        ]
+      }
+    },
+    {
+      "name": "no-ownerless-files",
+      "severity": "error",
+      "module": {
+        "path": "^(?:apps|packages)/(?:.*/)?(?:utils|helpers|misc)(?:[.][^/]*)?(?:/|$)",
+        "numberOfDependentsLessThan": 100
+      },
+      "from": {}
+    }
+  ],
+  "options": {
+    "parser": "swc",
+    "exclude": {
+      "path": "(?:^|/)(?:node_modules|dist|coverage|generated|[.]turbo|[.]agent_sources)(?:/|$)"
+    },
+    "doNotFollow": {
+      "path": "(?:^|/)node_modules(?:/|$)"
+    },
+    "skipAnalysisNotInRules": true,
+    "tsPreCompilationDeps": "specify",
+    "enhancedResolveOptions": {
+      "exportsFields": [
+        "exports"
+      ],
+      "conditionNames": [
+        "import",
+        "require",
+        "node",
+        "default"
+      ]
+    }
+  }
+}

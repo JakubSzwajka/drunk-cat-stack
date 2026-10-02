@@ -2,6 +2,14 @@
   "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
   "extends": ["@jakubszwajka/house-rules/biome"],
   "files": {
-    "includes": ["**", "!!node_modules", "!!dist", "!!coverage", "!!generated", "!!.agent_sources"]
+    "includes": [
+      "**",
+      "!!node_modules",
+      "!!dist",
+      "!!coverage",
+      "!!generated",
+      "!!.agent_sources",
+      "!!packages/rules/tests/fixtures"
+    ]
   }
 }

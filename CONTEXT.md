@@ -1,15 +1,15 @@
 # Context
 
-This repository, house-rules-stack, is a template. It is not a published library, a checker, or a source of product code.
+This repository, house-rules-stack, is a template, and the home of the house plugin. It is not a published library or a source of product code.
 
-The **house plugin** is the external `@jakubszwajka/house-rules` package, installed from GitHub at a pinned commit. It owns the **house rules** and the **presets**: the ESLint rules, the TypeScript and Biome presets, the Dependency Cruiser `layout()` factory, and the `house-rules-pins` bin. No rule code and no copy of a preset lives in this repository.
+The **house plugin** is the `@jakubszwajka/house-rules` package in `packages/rules`. It owns the **house rules** and the **presets**: the ESLint rules, the TypeScript and Biome presets, the Dependency Cruiser `layout()` factory, and the `house-rules-pins` bin. The template root uses it as a workspace package, `workspace:0.5.0`. Other apps install it from GitHub at a pinned commit with a `&path:/packages/rules` subpath. No rule code and no copy of a preset lives outside `packages/rules`.
 
 The template is a showcase of the house plugin wired into a real workspace. The plugin gives the deterministic feedback, and its README lists every checked rule. The template adds five things:
 
 1. **Thin configs**: `tsconfig.base.json`, `biome.json`, `.dependency-cruiser.cjs`, and `eslint.config.mjs`. Each points at a preset and sets only **project values**, such as the `@hosti/` scope or Biome's own excludes.
 2. **Stack-only files**, which no package can hand down: `turbo.json`, `pnpm-workspace.yaml`, `.env.schema`, CI, `lefthook.yml`, and the agent-harness hooks.
 3. Prose: `AGENTS.md`, `CONTEXT.md`, `README.md`, `VISION.md`, and `skills/`. The **prose rules** in `README.md` are what a reviewer checks, because no tool can.
-4. Example code: `apps/api` and `packages/bookings`.
+4. Example code: `apps/api` and `packages/bookings`. `packages/rules` is the plugin, not example code, so the layout rules do not apply to it.
 5. **Wiring tests** under `tests/`, which prove the thin configs and the fence are hooked up, not how each rule behaves. The plugin tests its own rules.
 
 The repository is a pnpm **workspace**: one root with one lockfile, plus workspace packages listed in `pnpm-workspace.yaml`. Turborepo runs each workspace package's `typecheck` and `test` scripts in dependency order. A **workspace package** is any folder under `apps/` or `packages/` with its own `package.json`. An **app** is a workspace package under `apps/`. It holds delivery, server, and use-case code, and nothing imports it. A **package** is a workspace package under `packages/`. It holds one module, and apps and other packages import it by its package name.
