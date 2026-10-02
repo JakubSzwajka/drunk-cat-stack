@@ -8,7 +8,7 @@ import { noBrokenRelativeLinksRule } from "./no-broken-relative-links.mjs";
 
 const plugin = {
   meta: {
-    name: "@jakubszwajka/house-rules",
+    name: "@house-rules/rules",
     version: "0.5.0",
   },
   rules: {

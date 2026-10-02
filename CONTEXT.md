@@ -1,8 +1,8 @@
 # Context
 
-This repository, house-rules-stack, is a template, and the home of the house plugin. It is not a published library or a source of product code.
+This repository, house-rules, is the home of the house plugin, and of a template, the stack. It is not a published library or a source of product code.
 
-The **house plugin** is the `@jakubszwajka/house-rules` package in `packages/rules`. It owns the **house rules** and the **presets**: the ESLint rules, the TypeScript and Biome presets, the Dependency Cruiser `layout()` factory, and the `house-rules-pins` bin. The template root uses it as a workspace package, `workspace:0.5.0`. Other apps install it from GitHub at a pinned commit with a `&path:/packages/rules` subpath. No rule code and no copy of a preset lives outside `packages/rules`.
+The **house plugin** is the `@house-rules/rules` package in `packages/rules`. It owns the **house rules** and the **presets**: the ESLint rules, the TypeScript and Biome presets, the Dependency Cruiser `layout()` factory, and the `house-rules-pins` bin. The template root uses it as a workspace package, `workspace:0.5.0`. Other apps install it from GitHub at a pinned commit with a `&path:/packages/rules` subpath. No rule code and no copy of a preset lives outside `packages/rules`.
 
 The template is a showcase of the house plugin wired into a real workspace. The plugin gives the deterministic feedback, and its README lists every checked rule. The template adds five things:
 

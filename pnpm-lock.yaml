@@ -162,7 +162,7 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-packageExtensionsChecksum: sha256-too+fYhi6o5Kpwp6pjf/wOOoTJpEdNyFHpGPz8hY108=
+packageExtensionsChecksum: sha256-xGhdlLk3e92Bf+OaCf61W/uIx3ILmN/ppXKV7cEhGyY=
 
 importers:
 
@@ -177,7 +177,7 @@ importers:
       '@eslint/markdown':
         specifier: 8.0.3
         version: 8.0.3(supports-color@7.2.0)
-      '@jakubszwajka/house-rules':
+      '@house-rules/rules':
         specifier: workspace:0.5.0
         version: link:packages/rules
       '@swc/core':

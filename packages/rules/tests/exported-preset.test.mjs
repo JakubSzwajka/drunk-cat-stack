@@ -17,7 +17,7 @@ async function lint(code, filePath) {
 
 test("exports plugin metadata and a flat preset for every supported extension", () => {
   assert.deepEqual(plugin.meta, {
-    name: "@jakubszwajka/house-rules",
+    name: "@house-rules/rules",
     version: "0.5.0",
   });
   assert.deepEqual(plugin.configs.recommended[0].files, ["**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}"]);

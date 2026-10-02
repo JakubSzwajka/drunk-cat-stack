@@ -1,15 +1,15 @@
-# @jakubszwajka/house-rules
+# @house-rules/rules
 
 House rules and house configs. One exact GitHub commit pin brings all of it: six ESLint rules, 16 Dependency Cruiser layout rules, TypeScript strict flags, Effect diagnostics, Biome linter and formatter, and an exact-pins checker. Private, not on npm.
 
 ## Install
 
-Node `>=24.21.0` only. The pins bin uses `fs.globSync`, with no fallback for older Node. The package lives in `packages/rules` of the house-rules-stack repository, so install it with pnpm and a Git subpath spec. The pins bin reads `pnpm-workspace.yaml`, so the app needs one.
+Node `>=24.21.0` only. The pins bin uses `fs.globSync`, with no fallback for older Node. The package lives in `packages/rules` of the house-rules repository, so install it with pnpm and a Git subpath spec. The pins bin reads `pnpm-workspace.yaml`, so the app needs one.
 
 ```json
 {
   "devDependencies": {
-    "@jakubszwajka/house-rules": "github:JakubSzwajka/house-rules-stack#<full-commit-sha>&path:/packages/rules"
+    "@house-rules/rules": "github:JakubSzwajka/house-rules#<full-40-char-sha>&path:/packages/rules"
   }
 }
 ```
@@ -18,19 +18,23 @@ Node `>=24.21.0` only. The pins bin uses `fs.globSync`, with no fallback for old
 
 | Entry point | Install in the app, exact pin |
 | --- | --- |
-| `@jakubszwajka/house-rules` | `eslint` `10.11.0` |
-| `@jakubszwajka/house-rules/markdown` | `@eslint/markdown` `8.0.3` |
-| `@jakubszwajka/house-rules/design` | `@eslint/css` `2.0.0` |
-| `@jakubszwajka/house-rules/dependency-cruiser` | `dependency-cruiser` `18.4.0` |
-| `@jakubszwajka/house-rules/biome` | `@biomejs/biome` `2.5.14` |
-| `@jakubszwajka/house-rules/tsconfig/*.json` | `typescript`, nothing else |
+| `@house-rules/rules` | `eslint` `10.11.0` |
+| `@house-rules/rules/markdown` | `@eslint/markdown` `8.0.3` |
+| `@house-rules/rules/design` | `@eslint/css` `2.0.0` |
+| `@house-rules/rules/dependency-cruiser` | `dependency-cruiser` `18.4.0` |
+| `@house-rules/rules/biome` | `@biomejs/biome` `2.5.14` |
+| `@house-rules/rules/tsconfig/*.json` | `typescript`, nothing else |
+
+### Migrating from @jakubszwajka/house-rules
+
+The package used to be called `@jakubszwajka/house-rules`. In the app's `package.json`, replace that dependency key with `@house-rules/rules` and use the spec above. In `eslint.config.mjs`, `biome.json`, `tsconfig.json`, and `.dependency-cruiser.cjs`, replace each `@jakubszwajka/house-rules` import or `extends` with `@house-rules/rules`. Rename the `packageExtensions` key in `pnpm-workspace.yaml` the same way. Subpath names do not change. An old pin keeps working until you move it, because the old commits are in this repo's history.
 
 ## Rules and checks
 
 | Rule | Catches | Tool | Enable via | Docs |
 | --- | --- | --- | --- | --- |
 | `comment-discipline` | Top-level narrative, multiline comments, adjacent groups; keeps one-line whys beside code | ESLint | `configs.recommended` | [comment-discipline.md](docs/comment-discipline.md) |
-| `no-broken-relative-links` | Relative Markdown links to untracked paths | ESLint | `@jakubszwajka/house-rules/markdown` | [no-broken-relative-links.md](docs/no-broken-relative-links.md) |
+| `no-broken-relative-links` | Relative Markdown links to untracked paths | ESLint | `@house-rules/rules/markdown` | [no-broken-relative-links.md](docs/no-broken-relative-links.md) |
 | `design-no-raw-color` | Raw hex, rgb(), hsl(), etc. in CSS | ESLint | `design()` factory | [design-no-raw-color.md](docs/design-no-raw-color.md) |
 | `design-no-raw-color-literal` | Raw hex, rgb(), hsl(), etc. in JS/TS strings | ESLint | `design()` factory | [design-no-raw-color-literal.md](docs/design-no-raw-color-literal.md) |
 | `design-no-unknown-token` | `var(--name)` with no definition | ESLint | `design()` factory | [design-no-unknown-token.md](docs/design-no-unknown-token.md) |
@@ -53,20 +57,20 @@ Node `>=24.21.0` only. The pins bin uses `fs.globSync`, with no fallback for old
 | `no-ownerless-files` | `utils/`, `helpers/`, `misc/` files or folders | Dependency Cruiser | `layout({ scope })` | [dependency-cruiser.md](docs/dependency-cruiser.md) |
 | Strict compiler flags | 15 flags: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and more | TypeScript | `tsconfig/strict.json` | [tsconfig.md](docs/tsconfig.md) |
 | Effect diagnostics | 31 diagnostics set to error | TypeScript | `tsconfig/effect.json` | [tsconfig.md](docs/tsconfig.md) |
-| `noReExportAll` | `export * from` | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
-| `noExcessiveLinesPerFile` | Files over 300 lines (warn) | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
-| `noNonNullAssertion` | `!` non-null assertions | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
-| `useFilenamingConvention` | Files not kebab-case or export | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
-| Formatter | indentWidth 2, lineWidth 100, indentStyle space | Biome | `@jakubszwajka/house-rules/biome` | [biome.md](docs/biome.md) |
+| `noReExportAll` | `export * from` | Biome | `@house-rules/rules/biome` | [biome.md](docs/biome.md) |
+| `noExcessiveLinesPerFile` | Files over 300 lines (warn) | Biome | `@house-rules/rules/biome` | [biome.md](docs/biome.md) |
+| `noNonNullAssertion` | `!` non-null assertions | Biome | `@house-rules/rules/biome` | [biome.md](docs/biome.md) |
+| `useFilenamingConvention` | Files not kebab-case or export | Biome | `@house-rules/rules/biome` | [biome.md](docs/biome.md) |
+| Formatter | indentWidth 2, lineWidth 100, indentStyle space | Biome | `@house-rules/rules/biome` | [biome.md](docs/biome.md) |
 | Exact pins | Every dependency must be an exact version, `workspace:<exact>`, or a Git spec with full commit SHA | Node | `house-rules-pins` bin | [pins.md](docs/pins.md) |
 
 ## Wire it up
 
 ```js
 // eslint.config.mjs
-import houseRules from "@jakubszwajka/house-rules";
-import houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";
-import design from "@jakubszwajka/house-rules/design";
+import houseRules from "@house-rules/rules";
+import houseRulesMarkdown from "@house-rules/rules/markdown";
+import design from "@house-rules/rules/design";
 
 export default [
   { ignores: ["dist/**", "coverage/**"] },
@@ -85,7 +89,7 @@ export default [
 
 ```js
 // .dependency-cruiser.cjs
-module.exports = require("@jakubszwajka/house-rules/dependency-cruiser").layout({
+module.exports = require("@house-rules/rules/dependency-cruiser").layout({
   scope: "@acme/",
 });
 ```
@@ -93,7 +97,7 @@ module.exports = require("@jakubszwajka/house-rules/dependency-cruiser").layout(
 ```json
 // tsconfig.base.json
 {
-  "extends": "@jakubszwajka/house-rules/tsconfig/effect.json"
+  "extends": "@house-rules/rules/tsconfig/effect.json"
 }
 ```
 
@@ -101,7 +105,7 @@ module.exports = require("@jakubszwajka/house-rules/dependency-cruiser").layout(
 // biome.json
 {
   "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
-  "extends": ["@jakubszwajka/house-rules/biome"],
+  "extends": ["@house-rules/rules/biome"],
   "files": {
     "includes": ["**", "!!node_modules", "!!dist", "!!coverage"]
   }

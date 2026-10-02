@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, it } from "node:test";
 
-const PLUGIN = "@jakubszwajka/house-rules";
+const PLUGIN = "@house-rules/rules";
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const readJson = (path) => JSON.parse(read(path));
 const require = createRequire(import.meta.url);

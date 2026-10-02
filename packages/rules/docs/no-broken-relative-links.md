@@ -2,7 +2,7 @@
 
 Rule ID: `house-rules/no-broken-relative-links`
 
-The rule runs on the `@eslint/markdown` language. It reports a Markdown link, image, or link reference definition when its relative target is not a path that git tracks in the repository that holds the linted file. Use the `@jakubszwajka/house-rules/markdown` preset to enable it.
+The rule runs on the `@eslint/markdown` language. It reports a Markdown link, image, or link reference definition when its relative target is not a path that git tracks in the repository that holds the linted file. Use the `@house-rules/rules/markdown` preset to enable it.
 
 ```md
 See the [setup guide](./setup.md).        <!-- passes when docs/setup.md is tracked -->
@@ -74,7 +74,7 @@ When roots are nested, the longest matching root wins. `./` prefixes and trailin
 
 ```js
 // eslint.config.mjs
-import houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";
+import houseRulesMarkdown from "@house-rules/rules/markdown";
 
 export default [
   ...houseRulesMarkdown,

@@ -1,4 +1,4 @@
-const config = require("@jakubszwajka/house-rules/dependency-cruiser").layout({
+const config = require("@house-rules/rules/dependency-cruiser").layout({
   scope: "@hosti/",
 });
 

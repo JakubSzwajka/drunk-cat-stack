@@ -31,11 +31,11 @@ async function writeFixtureFiles(fixtureDirectory) {
 
   await writeFile(
     path.join(fixtureDirectory, "eslint.config.mjs"),
-    'import houseRules from "@jakubszwajka/house-rules";\nimport design from "@jakubszwajka/house-rules/design";\nimport houseRulesMarkdown from "@jakubszwajka/house-rules/markdown";\n\nexport default [\n  ...houseRules.configs.recommended,\n  ...houseRulesMarkdown,\n  ...design({\n    tokenFiles: ["styles/tokens.css"],\n    source: { files: ["**/*.tsx"] },\n    rules: { "design-scale-value": [{ property: "radius$", allowed: ["4px"] }] },\n  }),\n];\n',
+    'import houseRules from "@house-rules/rules";\nimport design from "@house-rules/rules/design";\nimport houseRulesMarkdown from "@house-rules/rules/markdown";\n\nexport default [\n  ...houseRules.configs.recommended,\n  ...houseRulesMarkdown,\n  ...design({\n    tokenFiles: ["styles/tokens.css"],\n    source: { files: ["**/*.tsx"] },\n    rules: { "design-scale-value": [{ property: "radius$", allowed: ["4px"] }] },\n  }),\n];\n',
   );
   await writeFile(
     path.join(fixtureDirectory, ".dependency-cruiser.cjs"),
-    'module.exports = require("@jakubszwajka/house-rules/dependency-cruiser").layout({ scope: "@acme/" });\n',
+    'module.exports = require("@house-rules/rules/dependency-cruiser").layout({ scope: "@acme/" });\n',
   );
   await writeFile(
     path.join(fixtureDirectory, "pinned.json"),
@@ -99,19 +99,19 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { ESLint } from "eslint";
-import houseRules from "@jakubszwajka/house-rules";
-import { layout } from "@jakubszwajka/house-rules/dependency-cruiser";
+import houseRules from "@house-rules/rules";
+import { layout } from "@house-rules/rules/dependency-cruiser";
 
-assert.equal(houseRules.meta.name, "@jakubszwajka/house-rules");
+assert.equal(houseRules.meta.name, "@house-rules/rules");
 assert.equal(houseRules.configs.recommended[0].rules["house-rules/comment-discipline"], "error");
-assert.match(import.meta.resolve("@jakubszwajka/house-rules"), /node_modules/);
-assert.match(import.meta.resolve("@jakubszwajka/house-rules/markdown"), /node_modules/);
-assert.match(import.meta.resolve("@jakubszwajka/house-rules/design"), /node_modules/);
-assert.match(import.meta.resolve("@jakubszwajka/house-rules/dependency-cruiser"), /node_modules/);
+assert.match(import.meta.resolve("@house-rules/rules"), /node_modules/);
+assert.match(import.meta.resolve("@house-rules/rules/markdown"), /node_modules/);
+assert.match(import.meta.resolve("@house-rules/rules/design"), /node_modules/);
+assert.match(import.meta.resolve("@house-rules/rules/dependency-cruiser"), /node_modules/);
 assert.equal(houseRules.meta.version, ${JSON.stringify(packageVersion)});
 for (const preset of ["tsconfig/strict.json", "tsconfig/effect.json", "biome"]) {
-  const file = new URL(import.meta.resolve(\`@jakubszwajka/house-rules/\${preset}\`));
-  assert.match(file.pathname, /node_modules\\/@jakubszwajka\\/house-rules\\//);
+  const file = new URL(import.meta.resolve(\`@house-rules/rules/\${preset}\`));
+  assert.match(file.pathname, /node_modules\\/@house-rules\\/rules\\//);
   assert.equal(typeof JSON.parse(readFileSync(file, "utf8")), "object");
 }
 const pins = spawnSync("node_modules/.bin/house-rules-pins", ["pinned.json"], { encoding: "utf8" });
@@ -210,7 +210,7 @@ test("packs and installs the exact package before linting fresh JS, TS, Markdown
     await writeFixtureFiles(fixtureDirectory);
     const packageJsonPath = path.join(fixtureDirectory, "package.json");
     const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8"));
-    packageJson.dependencies["@jakubszwajka/house-rules"] =
+    packageJson.dependencies["@house-rules/rules"] =
       `file:${path.join(packageDirectory, packageArchive)}`;
     await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n");
 

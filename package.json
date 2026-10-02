@@ -1,8 +1,8 @@
 {
-  "name": "house-rules-stack",
+  "name": "house-rules",
   "version": "0.0.0",
   "private": true,
-  "description": "Monorepo template with thin configs over @jakubszwajka/house-rules for deterministic code-structure rules",
+  "description": "Monorepo template with thin configs over @house-rules/rules for deterministic code-structure rules",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -29,7 +29,7 @@
     "@biomejs/biome": "2.5.14",
     "@effect/tsgo": "0.45.0",
     "@eslint/markdown": "8.0.3",
-    "@jakubszwajka/house-rules": "workspace:0.5.0",
+    "@house-rules/rules": "workspace:0.5.0",
     "@swc/core": "1.16.2",
     "dependency-cruiser": "18.4.0",
     "eslint": "10.11.0",
