@@ -130,7 +130,18 @@ An app outside this repo installs the rules from GitHub, pinned to a full 40-cha
 1. [ ] Use Node `>=24.21.0` and pnpm. npm and Yarn do not read the `&path:` subpath.
 2. [ ] Keep a `pnpm-workspace.yaml` with a `packages:` list at the app root. The `house-rules-pins` bin reads it to find every manifest.
 3. [ ] Keep the `packageExtensions` entry that gives the plugin TypeScript 6.0.3, as this repo's `pnpm-workspace.yaml` does.
-4. [ ] To upgrade, change the SHA and run `pnpm install`.
+4. [ ] Install the peer dependencies of each entry point you import. `@eslint/css`, `@eslint/markdown`, and `dependency-cruiser` are optional peers, so pnpm does not install them for you. Importing `/design` without `@eslint/css` fails with `ERR_MODULE_NOT_FOUND`. Pin each one exactly, like every other dependency:
+
+| Entry point | Install in the app, exact pin |
+| --- | --- |
+| `@jakubszwajka/house-rules` | `eslint` `10.11.0` |
+| `@jakubszwajka/house-rules/markdown` | `@eslint/markdown` `8.0.3` |
+| `@jakubszwajka/house-rules/design` | `@eslint/css` `2.0.0` |
+| `@jakubszwajka/house-rules/dependency-cruiser` | `dependency-cruiser` `18.4.0` |
+| `@jakubszwajka/house-rules/biome` | `@biomejs/biome` `2.5.14` |
+| `@jakubszwajka/house-rules/tsconfig/*.json` | `typescript`, nothing else |
+
+5. [ ] To upgrade, change the SHA and run `pnpm install`.
 
 ### Add an app
 

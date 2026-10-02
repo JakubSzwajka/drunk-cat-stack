@@ -14,6 +14,17 @@ Node `>=24.21.0` only. The pins bin uses `fs.globSync`, with no fallback for old
 }
 ```
 
+`@eslint/css`, `@eslint/markdown`, and `dependency-cruiser` are optional peer dependencies, so pnpm does not install them. Install the ones your entry points need, each pinned exactly. Importing `/design` without `@eslint/css` fails with `ERR_MODULE_NOT_FOUND`.
+
+| Entry point | Install in the app, exact pin |
+| --- | --- |
+| `@jakubszwajka/house-rules` | `eslint` `10.11.0` |
+| `@jakubszwajka/house-rules/markdown` | `@eslint/markdown` `8.0.3` |
+| `@jakubszwajka/house-rules/design` | `@eslint/css` `2.0.0` |
+| `@jakubszwajka/house-rules/dependency-cruiser` | `dependency-cruiser` `18.4.0` |
+| `@jakubszwajka/house-rules/biome` | `@biomejs/biome` `2.5.14` |
+| `@jakubszwajka/house-rules/tsconfig/*.json` | `typescript`, nothing else |
+
 ## Rules and checks
 
 | Rule | Catches | Tool | Enable via | Docs |
