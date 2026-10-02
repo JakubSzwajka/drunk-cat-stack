@@ -7,10 +7,10 @@ adapter      HTTP route   MCP tool   CLI command    decides who calls, maps erro
                   \           |          /
 capability          showBooking contract + handler     one action, typed in and out
                               |
-service             Bookings (a package's deep module)  rules, access checks, data
+service             Bookings (a module's interface)     rules, access checks, data
 ```
 
-A service is the deep module inside a package. A capability is one action offered on top of it. Access and permission checks stay inside the service. The contract only carries the `readOnly` and `destructive` flags, so an adapter can tell a read from a write.
+A module is a deep piece of behavior: an interface plus a private implementation. Its service, a `Context.Service` class, is that interface. A capability is one action offered on top of the service; the module knows nothing about it. Access and permission checks stay inside the service. The contract only carries the `readOnly` and `destructive` flags, so an adapter can tell a read from a write.
 
 ## Usage
 
@@ -74,12 +74,12 @@ The package is not on npm. Install it from GitHub, pinned to a full 40-character
 }
 ```
 
-1. [ ] Use pnpm. npm and Yarn cannot install a package from a subpath of a Git repo.
+1. [ ] Use pnpm. npm has no subpath selector for Git dependencies and installs the whole repo root instead, which is the wrong package (checked). Yarn is not checked against this repo.
 2. [ ] Pin `effect` to the same exact version this package names in `peerDependencies`. It is an exact peer, and the handler types come from that copy of `effect`.
 3. [ ] A young Effect release candidate fails pnpm's `minimumReleaseAge` check. If your `pnpm-workspace.yaml` sets it, add `effect@<version>` to `minimumReleaseAgeExclude`.
 4. [ ] The package ships TypeScript source and has no build step. Your `tsc` compiles it as part of your program. Use TypeScript 7 or 6 with `module` and `moduleResolution` set to `NodeNext`, and `skipLibCheck: true`. It is tested with TypeScript 7.0.2.
 5. [ ] Or extend `@house-rules/rules/tsconfig/effect.json`, installed from the same commit as [the root README](../../README.md#using-the-rules-in-another-app) shows. The package passes its strict flags. Its Effect diagnostics run only after `pnpm exec effect-tsgo patch` from `@effect/tsgo`, as this repo's `prepare` script does.
-6. [ ] Run the code through a tool that compiles dependencies. Vitest does, so the test above runs as is. Plain `node` will not strip types inside `node_modules`, and fails with `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`.
+6. [ ] The usage example is a test, so it needs two dev dependencies, pinned exactly: `"@effect/vitest": "4.0.0-rc.117"` and `"vitest": "5.0.1"` (the versions this repo uses). Run the code through a tool that compiles dependencies. Vitest does, so the test above runs as is. Plain `node` will not strip types inside `node_modules`, and fails with `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`.
 7. [ ] To upgrade, change the SHA and run `pnpm install`.
 
 ## Limits
