@@ -1,5 +1,5 @@
 import type { Effect } from "effect";
-import type { AnyContract } from "./contract.js";
+import type { AnyContract } from "./contract.ts";
 
 export type Capability<Contract extends AnyContract, Requirements = never> = Readonly<{
   _tag: "Capability";

@@ -1,6 +1,6 @@
 import { expect, expectTypeOf, it } from "@effect/vitest";
 import { Context, Effect, Layer, Schema } from "effect";
-import { type Capability, defineContract, implement } from "../index.js";
+import { type Capability, defineContract, implement } from "../index.ts";
 
 class Greetings extends Context.Service<
   Greetings,
