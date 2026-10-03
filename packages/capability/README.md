@@ -61,6 +61,29 @@ it.layer(Greetings.layer)("greet", (test) => {
 
 `annotations` is optional. Each flag you leave out is `false`.
 
+## An action with no input
+
+Some actions take no input, such as "list my trips". Give them `NoInput` as the input schema:
+
+```ts
+import { Effect, Schema } from "effect";
+import { defineContract, implement, NoInput } from "@house-rules/capability";
+
+const pingContract = defineContract("ping", {
+  description: "Answer pong.",
+  input: NoInput,
+  output: Schema.String,
+  failure: Schema.Never,
+  annotations: { readOnly: true },
+});
+
+const ping = implement(pingContract, () => Effect.succeed("pong"));
+
+const pong = ping.handler({}); // Effect<string>: the handler takes an empty object
+```
+
+Do not use `Schema.Struct({})` for this. Effect renders it to JSON Schema as `{"not":{"type":"null"}}`, with no `type`. An MCP tool's input schema must have `"type": "object"`, so Effect's `McpServer` fails to list every tool with `SchemaError: Missing key at ["type"]`. `NoInput` is `Schema.Record(Schema.String, Schema.Never)`, the same shape as Effect's `Tool.EmptyParams`. It renders as `{"type":"object","additionalProperties":false}`, so an MCP tool can use `contract.input` as its `parameters` as is. Checked with `effect` 4.0.0-rc.117.
+
 ## Install in another app
 
 The package is not on npm. Install it from GitHub, pinned to a full 40-character commit of this repo, with a pnpm subpath:
@@ -86,8 +109,8 @@ The package is not on npm. Install it from GitHub, pinned to a full 40-character
 
 ## Limits
 
-This is v0. It has `defineContract` and `implement`, and nothing else. There is no registry of capabilities, and nothing turns a contract into an HTTP route, an MCP tool or a CLI command yet. The handler takes the decoded input. Decoding raw input with the contract's schema is the adapter's job, and no adapter exists yet.
+This is v0. It has `defineContract`, `implement` and `NoInput`, and nothing else. There is no registry of capabilities, and nothing turns a contract into an HTTP route, an MCP tool or a CLI command yet. The handler takes the decoded input. Decoding raw input with the contract's schema is the adapter's job, and no adapter exists yet.
 
 ## Exports
 
-`defineContract`, `implement`, and the types `Contract`, `AnyContract`, `Annotations`, `InputSchema`, `PlainSchema`, and `Capability`.
+`defineContract`, `implement`, the `NoInput` schema, and the types `Contract`, `AnyContract`, `Annotations`, `InputSchema`, `PlainSchema`, and `Capability`.
