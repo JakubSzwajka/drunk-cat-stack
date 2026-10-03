@@ -1,11 +1,15 @@
-import type { Schema } from "effect";
+import { Schema } from "effect";
 
 export type PlainSchema = Schema.Top & {
   readonly DecodingServices: never;
   readonly EncodingServices: never;
 };
 
-export type InputSchema = Schema.Struct<Record<string, PlainSchema>>;
+export const NoInput = Schema.Record(Schema.String, Schema.Never);
+
+export type NoInput = typeof NoInput;
+
+export type InputSchema = Schema.Struct<Record<string, PlainSchema>> | NoInput;
 
 export type Annotations = Readonly<{
   readOnly: boolean;
