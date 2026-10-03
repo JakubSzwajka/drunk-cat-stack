@@ -52,9 +52,9 @@ If the module stores data, it owns its tables:
 1. Put its migrations in `packages/<name>/migrations/*.sql`. A table belongs to the package whose migration creates it.
 2. No foreign key to another package's table. Keep the other module's id as a plain column, and ask that module's service for the record.
 3. The module's SQL names only its own tables. To read another module's data, call its service.
-4. One service method is one transaction. The method opens it. A use-case never does.
+4. A service method that writes is one transaction, and the method opens it. A read method may run without one. A use-case never opens one.
 
-`pnpm run migrations` checks the first three, and catches a use-case that calls `withTransaction`.
+`pnpm run migrations` checks the first three with a text scan, and catches a use-case that calls `withTransaction` or sends `begin`. The rest of rule 4 is a review rule. `packages/rules/docs/migrations.md` lists what the scan misses.
 
 The dependency-cruiser rules already cover a new package. `packages-public-entry-only` and `packages-imported-by-name` apply to every folder under `packages/`. If you use a new scope, change the `scope` option passed to `layout()` in `.dependency-cruiser.cjs`.
 
@@ -124,7 +124,7 @@ pnpm test
 | --- | --- |
 | `pnpm run pins` | Every `package.json` in the workspace pins exact versions, including `workspace:0.0.0`. The plugin's `house-rules-pins` bin runs the check. |
 | `pnpm run typecheck` | Effect diagnostics in every workspace package: no floating Effects, no global `Error` in the failure channel, no `Effect.run*` inside Effect code, no leaked requirements. |
-| `pnpm run migrations` | Each module's migrations sit in `packages/<name>/migrations/`, no foreign key or SQL string reaches another package's table, and no use-case opens a transaction. |
+| `pnpm run migrations` | Each module's migrations sit in `packages/<name>/migrations/`, and no foreign key or SQL string the scan can read names another package's table. No use-case calls `withTransaction` or sends `begin`. It is a text scan, so a review still checks that each write method opens its own transaction. |
 | `pnpm run deps` | Packages do not import apps, apps import packages only by name and only through `src/index.ts`, use-cases do not import delivery, server, or each other, app code sits in a layer, and no file is named `utils`, `helpers`, or `misc`. |
 | `pnpm run lint` | No comments that restate the code. Each use-case file exports one capability. No MCP tool, RPC, or HTTP endpoint is built by hand. |
 | `pnpm run biome` | Named barrel exports and file names. |

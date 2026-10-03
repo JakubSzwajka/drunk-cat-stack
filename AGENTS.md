@@ -50,12 +50,12 @@ The rules table in the house-rules README lists every checked rule, its tool, an
 
 ## Modules own their data
 
-- A module owns its migrations and its tables. Its migrations live in `packages/<name>/migrations/*.sql`. A table belongs to the package whose migration creates it. A `.sql` file anywhere else fails.
+- A module owns its migrations and its tables. Its migrations live in `packages/<name>/migrations/*.sql`. A table belongs to the package whose migration creates it. A `.sql` file anywhere else fails, except test fixtures under a package's own `fixtures/` or `tests/` folder, which own no tables.
 - No cross-module foreign keys. Keep another module's id as a plain column, and ask that module's service for the record.
 - A module's SQL names only its own tables, in migrations and in `src/`. To read another module's data, call its service. A plumbing package, such as a `db` package with the connection, owns no tables a module queries.
-- One module method is one transaction. The service method opens it. A use-case never opens one, and never spans two modules in one transaction.
+- One module write method is one transaction. The service method opens it; a read method may run without one. A use-case never opens one, and never spans two modules in one transaction.
 - `pnpm run migrations` (the `house-rules-migrations` bin) checks the first three, and catches a use-case that calls `withTransaction` or sends `begin`. The rest of the transaction rule is a review rule.
-- A cartridge passes the pull-out test, a review rule. It pushes in with one `Layer.provide` line. Deleting its package and that line leaves the rest building and passing.
+- A cartridge passes the pull-out test, a review rule. It pushes in with one `Layer.provide` line. Deleting its package and that line leaves the rest building and passing. That holds only when the caller side owns the port: if a use-case imports the cartridge's package, the capability has to go with it.
 
 ## Effect
 

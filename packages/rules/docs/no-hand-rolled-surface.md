@@ -2,7 +2,7 @@
 
 Rule ID: `house-rules/no-hand-rolled-surface`
 
-An MCP tool, an RPC, or an HTTP API endpoint is a surface an outside caller reaches. Build it from a capability's contract, so the name, the description, the input schema and the read and destructive flags are written once. The rule reports a surface built by hand outside the allowed paths. Enable it with `plugin.configs.capability`.
+An MCP tool, an RPC, or an HTTP API endpoint is a surface an outside caller reaches. Build it from a capability's contract, so the name, the description, the input schema and the read and destructive flags are written once. The rule reports a surface built by hand outside the allowed paths. Enable it with `plugin.configs.capability`, which runs it on JavaScript and TypeScript files alike.
 
 ```ts
 import { toTool } from "@house-rules/capability";

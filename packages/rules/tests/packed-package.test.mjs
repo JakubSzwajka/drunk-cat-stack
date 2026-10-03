@@ -120,7 +120,8 @@ assert.match(pins.stdout, /pins: every dependency is exact in pinned[.]json/);
 const migrations = spawnSync("node_modules/.bin/house-rules-migrations", [], { encoding: "utf8" });
 assert.equal(migrations.status, 0, migrations.stderr);
 assert.match(migrations.stdout, /migrations: no SQL migrations found/);
-assert.equal(houseRules.configs.capability[0].rules["house-rules/use-case-is-capability"], "error");
+assert.equal(houseRules.configs.capability[0].rules["house-rules/no-hand-rolled-surface"], "error");
+assert.equal(houseRules.configs.capability[1].rules["house-rules/use-case-is-capability"], "error");
 
 const dependencyCruiserConfig = createRequire(import.meta.url)("./.dependency-cruiser.cjs");
 assert.deepEqual(dependencyCruiserConfig, layout({ scope: "@acme/" }));

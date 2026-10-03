@@ -157,6 +157,71 @@ describe("house-rules-migrations", () => {
     assert.match(result.stderr, /outside a `<package>\/migrations\/` folder/);
   });
 
+  it("fails comma joins, only, using, truncate, schema prefixes and quoted names", () => {
+    const result = run({
+      "packages/auth/migrations/0001_user.sql": `${AUTH_MIGRATION}create table "odd""name" (id text);\n`,
+      "packages/trips/migrations/0001_trips.sql": TRIPS_MIGRATION,
+      "packages/trips/src/internal/queries.ts": [
+        'export const a = sql`select * from trip, "user"`;',
+        "export const b = sql`select * from trip t, generate_series(1, 3) g (n), auth.user u`;",
+        'export const c = "select * from only \\"user\\"";',
+        'export const d = sql`delete from trip using "auth" . "user" where true`;',
+        'export const e = sql`truncate only trip, "user"`;',
+        'export const f = \'select * from "odd""name"\';',
+        'export const g = sql`update only "user" set id = ${id}`;',
+      ].join("\n"),
+    });
+    assert.equal(result.status, 1);
+    assert.deepEqual(problemLines(result), [
+      "packages/trips/src/internal/queries.ts:1",
+      "packages/trips/src/internal/queries.ts:2",
+      "packages/trips/src/internal/queries.ts:3",
+      "packages/trips/src/internal/queries.ts:4",
+      "packages/trips/src/internal/queries.ts:5",
+      "packages/trips/src/internal/queries.ts:6",
+      "packages/trips/src/internal/queries.ts:7",
+    ]);
+    assert.match(result.stderr, /SQL names "odd"name", a table packages\/auth owns/);
+    assert.doesNotMatch(result.stderr, /"(?:trip|g|generate_series)"/);
+  });
+
+  it("does not read SQL comments, string constants or column lists as table names", () => {
+    const result = run({
+      "packages/auth/migrations/0001_user.sql": AUTH_MIGRATION,
+      "packages/trips/migrations/0001_trips.sql": `${TRIPS_MIGRATION}-- Copied from user.\ncomment on table trip is 'Joins from user';\n`,
+      "packages/trips/src/internal/queries.ts": [
+        "export const a = sql`select 'from user' as message from trip`;",
+        "export const b = sql`select * from trip -- join user\n  where id = ${id}`;",
+        "export const c = sql`select * from trip /* join user */`;",
+        "export const d = sql`select 'it''s from user', E'it\\\\'s from user' from trip`;",
+        "export const e = sql`select * from trip where note = '${note} from user'`;",
+        'export const f = "select \'from \\"user\\"\' from trip";',
+        'export const g = sql`insert into trip (id, "user") values (${id}, 1)`;',
+        "export const h = sql`update trip set id = 1, user = 2`;",
+        "export const i = sql`select * from trip t order by t.id, user`;",
+        "export const j = sql`select * from trip t join place p on p.trip_id = t.id`;",
+      ].join("\n"),
+    });
+    assert.equal(result.status, 0, result.stderr);
+  });
+
+  it("skips SQL test data under a package's fixtures or tests folder", () => {
+    const result = run({
+      "packages/auth/migrations/0001_user.sql": AUTH_MIGRATION,
+      "packages/db/fixtures/bad-name/0001-bad-name.sql": 'create table "user" (id int);\n',
+      "packages/trips/tests/seed.sql": 'insert into "user" values (1);\n',
+      "packages/trips/src/tests/fixtures/rows.sql": "select * from trip;\n",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /1 table\(s\) owned by 1 package\(s\)/);
+  });
+
+  it("still fails SQL test data outside a workspace package", () => {
+    const result = run({ "fixtures/seed.sql": "select 1;\n", "tests/seed.sql": "select 1;\n" });
+    assert.equal(result.status, 1);
+    assert.deepEqual(problemLines(result).sort(), ["fixtures/seed.sql:1", "tests/seed.sql:1"]);
+  });
+
   it("fails a use-case that opens a transaction", () => {
     const result = run({
       "apps/web/src/use-cases/trips/move-trip.ts": [

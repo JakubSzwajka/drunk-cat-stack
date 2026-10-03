@@ -2,13 +2,29 @@ import { Context, type Schema } from "effect";
 import { Tool } from "effect/unstable/ai";
 import type { Contract, InputSchema, PlainSchema } from "./contract.ts";
 
-export type ToToolOptions<Success extends Schema.Top, Failure extends Schema.Top> = Readonly<{
+export type ToToolOptions = Readonly<{
   title: string;
   idempotent: boolean;
   openWorld: boolean;
-  success?: Success;
-  failure?: Failure;
+  success?: Schema.Top | undefined;
+  failure?: Schema.Top | undefined;
 }>;
+
+export type ToolSchema<
+  Options extends ToToolOptions,
+  Key extends "success" | "failure",
+  Fallback extends Schema.Top,
+> = Options extends unknown
+  ? Key extends keyof Options
+    ?
+        | Exclude<Options[Key], undefined>
+        | (undefined extends Options[Key]
+            ? Fallback
+            : {} extends Pick<Options, Key>
+              ? Fallback
+              : never)
+    : Fallback
+  : never;
 
 export type ContractTool<
   Name extends string,
@@ -30,15 +46,22 @@ export const toTool = <
   Input extends InputSchema,
   Output extends PlainSchema,
   ContractFailure extends PlainSchema,
-  Success extends Schema.Top = Output,
-  Failure extends Schema.Top = ContractFailure,
+  Options extends ToToolOptions,
 >(
   contract: Contract<Name, Input, Output, ContractFailure>,
-  options: ToToolOptions<Success, Failure>,
-): ContractTool<Name, Input, Success, Failure> => {
-  // Without an override, Success and Failure fall back to their defaults, the contract schemas.
-  const success = (options.success ?? contract.output) as Success;
-  const failure = (options.failure ?? contract.failure) as Failure;
+  options: Options,
+): ContractTool<
+  Name,
+  Input,
+  ToolSchema<Options, "success", Output>,
+  ToolSchema<Options, "failure", ContractFailure>
+> => {
+  const success = (options.success ?? contract.output) as ToolSchema<Options, "success", Output>;
+  const failure = (options.failure ?? contract.failure) as ToolSchema<
+    Options,
+    "failure",
+    ContractFailure
+  >;
   return Tool.make(contract.name, {
     description: contract.description,
     parameters: contract.input,

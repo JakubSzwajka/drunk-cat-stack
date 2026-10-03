@@ -99,6 +99,78 @@ it.effect("success and failure overrides replace the contract schemas", () =>
   }),
 );
 
+it.effect("an override the options may omit is typed as either schema", () =>
+  Effect.sync(() => {
+    const maybeNumber: {
+      title: string;
+      idempotent: boolean;
+      openWorld: boolean;
+      success?: typeof Schema.Finite;
+      failure?: typeof ToolProblem | undefined;
+    } = mcpOnly;
+    const optional = toTool(greetContract, maybeNumber);
+
+    expect(optional.successSchema).toBe(Schema.String);
+    expect(optional.failureSchema).toBe(NameIsEmpty);
+    expectTypeOf(optional.successSchema).toEqualTypeOf<
+      typeof Schema.Finite | typeof Schema.String
+    >();
+    expectTypeOf(optional.failureSchema).toEqualTypeOf<typeof ToolProblem | typeof NameIsEmpty>();
+    expectTypeOf(optional.successSchema).not.toEqualTypeOf<typeof Schema.Finite>();
+  }),
+);
+
+type UnionOptions = typeof mcpOnly &
+  (
+    | { mode: "contract" }
+    | { mode: "view"; success: typeof Schema.Finite; failure: typeof ToolProblem }
+  );
+
+const projectUnion = (options: UnionOptions) => toTool(greetContract, options);
+
+it.effect("a union of options types the success override of each member", () =>
+  Effect.sync(() => {
+    const view = projectUnion({
+      ...mcpOnly,
+      mode: "view",
+      success: Schema.Finite,
+      failure: ToolProblem,
+    });
+    const contract = projectUnion({ ...mcpOnly, mode: "contract" });
+
+    expect(view.successSchema).toBe(Schema.Finite);
+    expect(contract.successSchema).toBe(Schema.String);
+    expectTypeOf(view.successSchema).toEqualTypeOf<typeof Schema.Finite | typeof Schema.String>();
+    expectTypeOf(view.successSchema).not.toEqualTypeOf<typeof Schema.String>();
+  }),
+);
+
+it.effect("a union of options types the failure override of each member", () =>
+  Effect.sync(() => {
+    const view = projectUnion({
+      ...mcpOnly,
+      mode: "view",
+      success: Schema.Finite,
+      failure: ToolProblem,
+    });
+    const contract = projectUnion({ ...mcpOnly, mode: "contract" });
+
+    expect(view.failureSchema).toBe(ToolProblem);
+    expect(contract.failureSchema).toBe(NameIsEmpty);
+    expectTypeOf(view.failureSchema).toEqualTypeOf<typeof ToolProblem | typeof NameIsEmpty>();
+    expectTypeOf(view.failureSchema).not.toEqualTypeOf<typeof NameIsEmpty>();
+  }),
+);
+
+it.effect("an override set to undefined keeps the contract schema", () =>
+  Effect.sync(() => {
+    const unset = toTool(greetContract, { ...mcpOnly, success: undefined });
+
+    expect(unset.successSchema).toBe(Schema.String);
+    expectTypeOf(unset.successSchema).toEqualTypeOf<typeof Schema.String>();
+  }),
+);
+
 it.effect("a NoInput contract renders as an object with no properties", () =>
   Effect.sync(() => {
     expect(Tool.getJsonSchema(toTool(pingContract, mcpOnly))).toEqual({

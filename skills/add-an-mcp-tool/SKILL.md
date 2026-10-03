@@ -7,7 +7,7 @@ description: Expose an existing use-case to agents as an MCP tool, and set up th
 
 A tool lets an agent run one use-case. The use-case and the module do the work and check access. The tool only decides who is calling, runs the use-case, and maps its errors. Read the "Agent adapters (MCP and CLI)" section of `AGENTS.md` first. `docs/mcp-adapter.md` says why the pattern looks like this.
 
-The reference implementation is Trippy, in `/home/kuba/DEV/priv/trippy` or its GitHub repo. It serves a read-only MCP server with three tools. Its `docs/mcp.md` shows the layout and the request flow, and `docs/mcp-clerk-setup.md` is its identity provider checklist.
+The reference implementation is Trippy, in `/home/kuba/DEV/priv/trippy` or its GitHub repo. Its MCP server has nine tools. Four are read-only: list trips, show a trip, show its cost summary, and read a maps link. Five write: create and update a trip, and add, change and remove an item. Its `docs/mcp.md` shows the layout and the request flow, and `docs/mcp-clerk-setup.md` is its identity provider checklist.
 
 | Part | Template path | Trippy path |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ Trippy is a Next.js app, so its delivery layer is `src/app/`. In the template la
 
 ## 1. Check the prerequisites
 
-1. [ ] The capability is a module in `packages/<name>`. If not, follow `skills/add-an-effect-module/SKILL.md` first.
+1. [ ] The data and its access rules live in a module in `packages/<name>`. If not, follow `skills/add-an-effect-module/SKILL.md` first. The module is not the capability: the capability is the use-case in step 4.
 2. [ ] Each service method that acts for a user takes an `Actor` argument and checks access inside the module.
 3. [ ] The package exports a `Viewer` service that holds the `Actor`.
 4. [ ] A use-case in `apps/<app>/src/use-cases/` is a capability: a contract from `defineContract` and a handler from `implement`, both from `@house-rules/capability`. Its handler yields `Viewer` and the service, and does what the tool needs. If it is missing, write it first, with its test. A tool never calls the module itself.

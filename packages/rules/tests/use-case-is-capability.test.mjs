@@ -13,9 +13,9 @@ const CAPABILITY = [
 function lint(code, filename = USE_CASE, options) {
   const config = plugin.configs.capability.map((entry) => ({
     ...entry,
-    rules: {
-      "house-rules/use-case-is-capability": options ? ["error", options] : "error",
-    },
+    rules: entry.rules["house-rules/use-case-is-capability"]
+      ? { "house-rules/use-case-is-capability": options ? ["error", options] : "error" }
+      : {},
   }));
   const messages = new Linter().verify(code, config, { filename });
   assert.equal(

@@ -8,9 +8,9 @@ const DELIVERY = "apps/api/src/delivery/mcp/tools.ts";
 function lint(code, filename = DELIVERY, options) {
   const config = plugin.configs.capability.map((entry) => ({
     ...entry,
-    rules: {
-      "house-rules/no-hand-rolled-surface": options ? ["error", options] : "error",
-    },
+    rules: entry.rules["house-rules/no-hand-rolled-surface"]
+      ? { "house-rules/no-hand-rolled-surface": options ? ["error", options] : "error" }
+      : {},
   }));
   const messages = new Linter().verify(code, config, { filename });
   assert.equal(
@@ -89,4 +89,29 @@ test("the message points at toTool", () => {
     plugin.rules["no-hand-rolled-surface"].meta.messages.handRolled,
     /from its contract with toTool/,
   );
+});
+
+test("the capability preset runs it on JavaScript files too", () => {
+  const code = 'import { Tool } from "effect/unstable/ai";\nTool.make("ping", {});';
+  for (const extension of ["js", "jsx", "mjs", "cjs", "ts", "mts", "cts", "tsx"]) {
+    const messages = new Linter().verify(code, plugin.configs.capability, {
+      filename: `apps/api/src/delivery/mcp/tools.${extension}`,
+    });
+    assert.deepEqual(
+      messages.map(({ ruleId, line }) => [ruleId, line]),
+      [["house-rules/no-hand-rolled-surface", 2]],
+      extension,
+    );
+  }
+});
+
+test("the capability preset keeps use-case-is-capability on TypeScript files", () => {
+  const code = "export const x = 1;";
+  const ruleIds = (filename) =>
+    new Linter().verify(code, plugin.configs.capability, { filename }).map(({ ruleId }) => ruleId);
+  assert.deepEqual(ruleIds("apps/api/src/use-cases/bad.mjs"), []);
+  assert.deepEqual(ruleIds("apps/api/src/use-cases/bad.ts"), [
+    "house-rules/use-case-is-capability",
+    "house-rules/use-case-is-capability",
+  ]);
 });

@@ -79,7 +79,7 @@ These are what a reviewer checks. A green `pnpm check` says nothing about them.
 - Nobody loosens a compiler option in a `tsconfig.json`. TypeScript accepts `strict: true` next to `strictNullChecks: false`.
 - Nobody switches off or weakens a preset rule in a thin config. The wiring test only checks that each preset is still extended.
 - A cartridge passes the pull-out test. Delete its package and its one `Layer.provide` line, and the rest still builds and passes. A reviewer runs the test in their head for each new cartridge.
-- One module method is one transaction. A use-case never opens one. The migrations bin catches only `withTransaction` and a `begin` string in a use-case.
+- One module write method is one transaction; a read method may run without one. A use-case never opens one. The migrations bin catches only `withTransaction` and a `begin` string in a use-case.
 
 ## Fence
 

@@ -51,7 +51,7 @@ plugin.configs.recommended = [
 
 plugin.configs.capability = [
   {
-    files: ["**/*.{ts,tsx,mts,cts}"],
+    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -64,8 +64,13 @@ plugin.configs.capability = [
       "house-rules": plugin,
     },
     rules: {
-      "house-rules/use-case-is-capability": "error",
       "house-rules/no-hand-rolled-surface": "error",
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx,mts,cts}"],
+    rules: {
+      "house-rules/use-case-is-capability": "error",
     },
   },
 ];
